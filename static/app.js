@@ -113,11 +113,7 @@ function trackerCluster() {
         },
 
         getWagoRows() {
-            var rows = [];
-            for (var i = 0; i < this.cluster.length; i += 5) {
-                rows.push(this.cluster.slice(i, i + 5));
-            }
-            return rows;
+            return [this.cluster];
         },
 
         // Get pixel color for a specific device
