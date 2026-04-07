@@ -15,8 +15,10 @@
     <header class="header">
         <h1>TEKNO TRACKER CLUSTER</h1>
         <div class="header-right">
-            <span x-text="'WAGO: ' + getStats().wagosOnline + '/' + getStats().wagosTotal"></span>
-            <span x-text="'Tracker: ' + getStats().online + '/' + getStats().total"></span>
+            <span x-text="'PlantManager: ' + getStats().wagosOnline + '/' + getStats().wagosTotal"></span>
+            <template x-for="ms in getStats().modeCounts" :key="'mc'+ms.label">
+                <span :style="'color:' + ms.color" x-text="ms.label + ':' + ms.count"></span>
+            </template>
             <span x-show="lastPoll" x-text="'Son: ' + lastPoll" style="color:#666"></span>
         </div>
     </header>

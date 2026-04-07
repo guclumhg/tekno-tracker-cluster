@@ -152,6 +152,7 @@ function trackerCluster() {
         // Total stats
         getStats() {
             var total = 0, online = 0, error = 0, wagosOnline = 0;
+            var mc = { 0: 0, 1: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
             for (var i = 0; i < this.cluster.length; i++) {
                 var w = this.cluster[i];
                 if (w.online) wagosOnline++;
@@ -161,12 +162,26 @@ function trackerCluster() {
                     if (!o.devices) continue;
                     for (var k = 0; k < o.devices.length; k++) {
                         total++;
-                        if (o.devices[k].error) error++;
-                        else online++;
+                        var d = o.devices[k];
+                        if (d.error) { error++; }
+                        else {
+                            online++;
+                            if (d.mode !== null && d.mode !== undefined && mc[d.mode] !== undefined) mc[d.mode]++;
+                        }
                     }
                 }
             }
-            return { total: total, online: online, error: error, wagosOnline: wagosOnline, wagosTotal: this.cluster.length };
+            var modeCounts = [
+                { label: 'FT', count: mc[0], color: '#9E9E9E' },
+                { label: 'AST', count: mc[1], color: '#4CAF50' },
+                { label: 'NGT', count: mc[5], color: '#673AB7' },
+                { label: 'WND', count: mc[6], color: '#FF9800' },
+                { label: 'SNW', count: mc[7], color: '#2196F3' },
+                { label: 'MNT', count: mc[8], color: '#FFD600' },
+                { label: 'ZRO', count: mc[9], color: '#795548' },
+                { label: 'ERR', count: error, color: '#D32F2F' },
+            ];
+            return { total: total, online: online, error: error, wagosOnline: wagosOnline, wagosTotal: this.cluster.length, modeCounts: modeCounts };
         },
 
         // Settings
