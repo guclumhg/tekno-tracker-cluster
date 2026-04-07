@@ -166,43 +166,6 @@
                 </div>
             </div>
 
-            <div class="form-box">
-                <div class="form-title">WAGO Background Reader Ayarlari</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>WAGO</th>
-                            <th>DTK</th>
-                            <th>BR Aktif</th>
-                            <th>Aralik (sn)</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template x-for="(wago, wi) in cluster" :key="'bw'+wi">
-                            <template x-for="(omega, oi) in (wago.omegas || [])" :key="'bo'+wi+'_'+oi">
-                                <tr x-show="wago.online">
-                                    <td x-show="oi === 0" :rowspan="wago.omegas.length" style="font-weight:bold" x-text="wago.name"></td>
-                                    <td x-text="omega.name"></td>
-                                    <td style="text-align:center">
-                                        <span :style="'color:' + (omega.online ? '#4CAF50' : '#D32F2F')"
-                                              x-text="omega.online ? 'Aktif' : 'Pasif'"></span>
-                                    </td>
-                                    <td style="text-align:center">60</td>
-                                    <td>
-                                        <button class="btn btn-green btn-sm"
-                                                x-show="!omega.online"
-                                                @click="toggleBR(wago.ip, omega.id, true, 60)">AC</button>
-                                        <button class="btn btn-red btn-sm"
-                                                x-show="omega.online"
-                                                @click="toggleBR(wago.ip, omega.id, false, 60)">KAPAT</button>
-                                    </td>
-                                </tr>
-                            </template>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
         </div>
 
     </main>
