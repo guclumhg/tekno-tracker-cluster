@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tekno Tracker Cluster</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/app.js"></script>
+    <script src="/static/alpine.min.js" defer></script>
+</head>
+<body>
+
+<div id="app" x-data="trackerCluster()">
+
+    <header class="header">
+        <h1>TEKNO TRACKER CLUSTER</h1>
+        <div class="header-right">
+            <span x-text="'WAGO: ' + getStats().wagosOnline + '/' + getStats().wagosTotal"></span>
+            <span x-text="'Tracker: ' + getStats().online + '/' + getStats().total"></span>
+            <span x-show="lastPoll" x-text="'Son: ' + lastPoll" style="color:#666"></span>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <template x-for="tab in tabs" :key="tab.id">
+            <button class="tab-btn"
+                    :class="{ active: currentTab === tab.id }"
+                    @click="currentTab = tab.id"
+                    x-text="tab.label">
+            </button>
+        </template>
+    </nav>
+
+    <main class="content">
+
+        <!-- ============================================================ -->
+        <!-- MOD HARITASI                                                  -->
+        <!-- ============================================================ -->
+        <div x-show="currentTab === 'modes'">
+            <div class="toolbar">
+                <button class="btn btn-blue btn-sm" @click="loadCluster()" :disabled="loading">YENILE</button>
+                <button class="btn btn-orange btn-sm" @click="manualPoll()" :disabled="loading">SUNUCU POLL</button>
+                <label class="toggle-label">
+                    <input type="checkbox" x-model="autoRefresh" @change="toggleAutoRefresh()">
+                    Otomatik
+                </label>
+                <span class="refresh-info" x-show="loading">Yukleniyor...</span>
+            </div>
+
+            <div class="legend">
+                <span class="legend-item"><span class="legend-dot" style="background:#9E9E9E"></span>FT</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#4CAF50"></span>AST</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#673AB7"></span>NGT</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#FF9800"></span>WND</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#2196F3"></span>SNW</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#FFD600"></span>MNT</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#795548"></span>ZRO</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#D32F2F"></span>ERR</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#333"></span>OFF</span>
+            </div>
+
+            <div class="block-group">
+                <!-- Left half: WAGO 1-8 -->
+                <div class="block-half">
+                    <template x-for="(wago, wi) in getLeftWagos()" :key="'lw'+wi">
+                        <div class="block">
+                            <div class="block-label" x-text="wago.name" :style="'color:' + (wago.online ? '#4FC3F7' : '#555')"></div>
+                            <div class="pixel-grid">
+                                <template x-for="row in 16" :key="'lr'+wi+'_'+row">
+                                    <template x-for="col in 16" :key="'lc'+wi+'_'+row+'_'+col">
+                                        <div class="pixel"
+                                             :style="'background:' + getPixelColor(wago, row-1, col-1)"
+                                             :title="wago.name + ' DTK' + row + ' Cihaz' + col">
+                                        </div>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <!-- Right half: WAGO 9-15 -->
+                <div class="block-half">
+                    <template x-for="(wago, wi) in getRightWagos()" :key="'rw'+wi">
+                        <div class="block">
+                            <div class="block-label" x-text="wago.name" :style="'color:' + (wago.online ? '#4FC3F7' : '#555')"></div>
+                            <div class="pixel-grid">
+                                <template x-for="row in 16" :key="'rr'+wi+'_'+row">
+                                    <template x-for="col in 16" :key="'rc'+wi+'_'+row+'_'+col">
+                                        <div class="pixel"
+                                             :style="'background:' + getPixelColor(wago, row-1, col-1)"
+                                             :title="wago.name + ' DTK' + row + ' Cihaz' + col">
+                                        </div>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ACI HARITASI                                                  -->
+        <!-- ============================================================ -->
+        <div x-show="currentTab === 'angles'">
+            <div class="toolbar">
+                <button class="btn btn-blue btn-sm" @click="loadCluster()" :disabled="loading">YENILE</button>
+            </div>
+
+            <template x-for="(wago, wi) in cluster" :key="'aw'+wi">
+                <div class="form-box" x-show="wago.online">
+                    <div class="form-title" x-text="wago.name"></div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>DTK</th>
+                                <template x-for="col in 16" :key="'ah'+wi+'_'+col">
+                                    <th style="text-align:center;min-width:30px" x-text="col"></th>
+                                </template>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="(omega, oi) in (wago.omegas || [])" :key="'ao'+wi+'_'+oi">
+                                <tr>
+                                    <td style="font-size:9px;white-space:nowrap" x-text="omega.name"></td>
+                                    <template x-for="col in 16" :key="'ac'+wi+'_'+oi+'_'+col">
+                                        <td style="text-align:center;font-size:9px;padding:2px"
+                                            x-text="getAngleText(wago, oi, col-1)"
+                                            :style="'color:' + (getAngleText(wago, oi, col-1) ? '#ccc' : '#333')">
+                                        </td>
+                                    </template>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- DURUM                                                         -->
+        <!-- ============================================================ -->
+        <div x-show="currentTab === 'status'">
+            <div class="toolbar">
+                <button class="btn btn-blue btn-sm" @click="loadCluster()" :disabled="loading">YENILE</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>WAGO</th>
+                        <th>IP</th>
+                        <th>Durum</th>
+                        <th>DTK</th>
+                        <th>Toplam Cihaz</th>
+                        <th>Son Guncelleme</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="(wago, wi) in cluster" :key="'sw'+wi">
+                        <tr>
+                            <td style="font-weight:bold" x-text="wago.name"></td>
+                            <td x-text="wago.ip"></td>
+                            <td>
+                                <span :style="'color:' + (wago.online ? '#4CAF50' : '#D32F2F')"
+                                      x-text="wago.online ? 'Online' : 'Offline'"></span>
+                            </td>
+                            <td x-text="wago.omegas ? wago.omegas.length : 0"></td>
+                            <td x-text="wago.omegas ? wago.omegas.reduce(function(s,o){ return s + (o.devices ? o.devices.length : 0); }, 0) : 0"></td>
+                            <td style="color:#666" x-text="wago.last_update || '-'"></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- AYARLAR                                                       -->
+        <!-- ============================================================ -->
+        <div x-show="currentTab === 'settings'">
+            <div class="form-box">
+                <div class="form-title">Cluster Ayarlari</div>
+                <div class="form-row">
+                    <label>Poll Aralik (sn):</label>
+                    <input type="number" x-model.number="settings.poll_interval" min="5" max="3600" style="width:60px">
+                    <button class="btn btn-orange btn-sm" @click="saveSettings()" :disabled="settings.saving">KAYDET</button>
+                    <span class="refresh-info" x-text="settings.msg"></span>
+                </div>
+            </div>
+
+            <div class="form-box">
+                <div class="form-title">WAGO Background Reader Ayarlari</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>WAGO</th>
+                            <th>DTK</th>
+                            <th>BR Aktif</th>
+                            <th>Aralik (sn)</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="(wago, wi) in cluster" :key="'bw'+wi">
+                            <template x-for="(omega, oi) in (wago.omegas || [])" :key="'bo'+wi+'_'+oi">
+                                <tr x-show="wago.online">
+                                    <td x-show="oi === 0" :rowspan="wago.omegas.length" style="font-weight:bold" x-text="wago.name"></td>
+                                    <td x-text="omega.name"></td>
+                                    <td style="text-align:center">
+                                        <span :style="'color:' + (omega.online ? '#4CAF50' : '#D32F2F')"
+                                              x-text="omega.online ? 'Aktif' : 'Pasif'"></span>
+                                    </td>
+                                    <td style="text-align:center">60</td>
+                                    <td>
+                                        <button class="btn btn-green btn-sm"
+                                                x-show="!omega.online"
+                                                @click="toggleBR(wago.ip, omega.id, true, 60)">AC</button>
+                                        <button class="btn btn-red btn-sm"
+                                                x-show="omega.online"
+                                                @click="toggleBR(wago.ip, omega.id, false, 60)">KAPAT</button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+</body>
+</html>
