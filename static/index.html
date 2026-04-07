@@ -63,7 +63,7 @@
                 <div class="block-row">
                     <template x-for="(wago, wi) in wagoRow" :key="'bw'+ri+'_'+wi">
                         <div class="block">
-                            <div class="block-label" x-text="wago.name" :style="'color:' + (wago.online ? '#4FC3F7' : '#555')"></div>
+                            <a class="block-label" :href="'http://' + wago.ip + ':8090/'" target="_blank" x-text="wago.name" :style="'color:' + (wago.online ? '#4FC3F7' : '#555') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
                             <div class="pixel-grid">
                                 <template x-for="row in 16" :key="'pr'+ri+'_'+wi+'_'+row">
                                     <template x-for="col in 16" :key="'pc'+ri+'_'+wi+'_'+row+'_'+col">
