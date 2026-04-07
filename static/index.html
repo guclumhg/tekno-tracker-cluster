@@ -117,40 +117,39 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- DURUM                                                         -->
+        <!-- ZAMAN HARITASI                                                -->
         <!-- ============================================================ -->
-        <div x-show="currentTab === 'status'">
+        <div x-show="currentTab === 'time'">
             <div class="toolbar">
                 <button class="btn btn-blue btn-sm" @click="loadCluster()" :disabled="loading">YENILE</button>
+                <button class="btn btn-orange btn-sm" @click="manualPoll()" :disabled="loading">SUNUCU POLL</button>
+                <label class="toggle-label">
+                    <input type="checkbox" x-model="autoRefresh" @change="toggleAutoRefresh()">
+                    Otomatik
+                </label>
+                <span class="refresh-info" x-show="loading">Yukleniyor...</span>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>WAGO</th>
-                        <th>IP</th>
-                        <th>Durum</th>
-                        <th>DTK</th>
-                        <th>Toplam Cihaz</th>
-                        <th>Son Guncelleme</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template x-for="(wago, wi) in cluster" :key="'sw'+wi">
-                        <tr>
-                            <td style="font-weight:bold" x-text="wago.name"></td>
-                            <td x-text="wago.ip"></td>
-                            <td>
-                                <span :style="'color:' + (wago.online ? '#4CAF50' : '#D32F2F')"
-                                      x-text="wago.online ? 'Online' : 'Offline'"></span>
-                            </td>
-                            <td x-text="wago.omegas ? wago.omegas.length : 0"></td>
-                            <td x-text="wago.omegas ? wago.omegas.reduce(function(s,o){ return s + (o.devices ? o.devices.length : 0); }, 0) : 0"></td>
-                            <td style="color:#666" x-text="wago.last_update || '-'"></td>
-                        </tr>
+            <template x-for="(wagoRow, ri) in getWagoRows()" :key="'tr'+ri">
+                <div class="block-row">
+                    <template x-for="(wago, wi) in wagoRow" :key="'tb'+ri+'_'+wi">
+                        <div class="block">
+                            <a class="block-label" :href="'http://' + wago.ip + ':8090/'" target="_blank" x-text="wago.name" :style="'color:' + (wago.online ? '#4FC3F7' : '#555') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
+                            <div class="time-grid">
+                                <template x-for="row in 16" :key="'ter'+ri+'_'+wi+'_'+row">
+                                    <template x-for="col in 16" :key="'tec'+ri+'_'+wi+'_'+row+'_'+col">
+                                        <div class="time-cell"
+                                             :class="getTimeText(wago, row-1, col-1) ? '' : 'time-empty'"
+                                             :title="wago.name + ' DTK' + row + ' Cihaz' + col"
+                                             x-text="getTimeText(wago, row-1, col-1) || ''">
+                                        </div>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
                     </template>
-                </tbody>
-            </table>
+                </div>
+            </template>
         </div>
 
         <!-- ============================================================ -->

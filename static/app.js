@@ -37,7 +37,7 @@ function trackerCluster() {
         tabs: [
             { id: 'modes',    label: 'Mod Haritasi' },
             { id: 'angles',   label: 'Aci Haritasi' },
-            { id: 'status',   label: 'Durum' },
+            { id: 'time',     label: 'Zaman Haritasi' },
             { id: 'settings', label: 'Ayarlar' },
         ],
 
@@ -122,6 +122,16 @@ function trackerCluster() {
             var dev = omega.devices[devIdx];
             if (!dev || dev.error || dev.angle === null || dev.angle === undefined) return '';
             return dev.angle + '';
+        },
+
+        getTimeText(wago, omegaIdx, devIdx) {
+            if (!wago || !wago.online) return '';
+            if (!wago.omegas || omegaIdx >= wago.omegas.length) return '';
+            var omega = wago.omegas[omegaIdx];
+            if (!omega || !omega.online || !omega.devices || devIdx >= omega.devices.length) return '';
+            var dev = omega.devices[devIdx];
+            if (!dev || dev.error || !dev.time) return '';
+            return dev.time;
         },
 
         getModeName(val) {

@@ -79,9 +79,10 @@ func saveConfig() {
 // ---------------------------------------------------------------------------
 
 type DeviceData struct {
-	Mode  *int `json:"mode"`
-	Angle *int `json:"angle"`
-	Error bool `json:"error"`
+	Mode  *int    `json:"mode"`
+	Angle *int    `json:"angle"`
+	Time  string  `json:"time"`
+	Error bool    `json:"error"`
 }
 
 type OmegaData struct {
@@ -212,6 +213,9 @@ func pollOneWago(wago WagoCfg) WagoSnapshot {
 			if len(devCache.Input) > 5 {
 				a := inclinationToDegrees(devCache.Input[5])
 				dd.Angle = &a
+			}
+			if len(devCache.Holding) > 7 {
+				dd.Time = fmt.Sprintf("%02d:%02d", devCache.Holding[6], devCache.Holding[7])
 			}
 			od.Devices[dev] = dd
 		}
