@@ -120,6 +120,10 @@ function trackerCluster() {
             return [this.cluster];
         },
 
+        reverseRow(row) {
+            return 17 - row;
+        },
+
         // Get pixel color for a specific device
         getPixelColor(pm, omegaIdx, devIdx) {
             if (!pm || !pm.online) return OFFLINE_COLOR;

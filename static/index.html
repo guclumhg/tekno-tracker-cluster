@@ -16,7 +16,7 @@
         <h1>TEKNO TRACKER CLUSTER</h1>
         <div class="header-right">
             <span x-text="'PlantManager: ' + getStats().pmsOnline + '/' + getStats().pmsTotal"></span>
-            <span x-show="lastPoll" x-text="'Son: ' + lastPoll" style="color:#666"></span>
+            <span x-show="lastPoll" x-text="'Son Guncelleme: ' + lastPoll" style="color:#666"></span>
         </div>
     </header>
 
@@ -95,8 +95,8 @@
                                 <template x-for="row in 16" :key="'pr'+ri+'_'+wi+'_'+row">
                                     <template x-for="col in 16" :key="'pc'+ri+'_'+wi+'_'+row+'_'+col">
                                         <div class="pixel"
-                                             :style="'background:' + getPixelColor(pm, row-1, col-1)"
-                                             :title="pm.name + ' DTK' + row + ' Cihaz' + col">
+                                             :style="'background:' + getPixelColor(pm, reverseRow(row)-1, col-1)"
+                                             :title="pm.name + ' DTK' + reverseRow(row) + ' Cihaz' + col">
                                         </div>
                                     </template>
                                 </template>
@@ -156,9 +156,9 @@
                                 <template x-for="row in 16" :key="'aer'+ri+'_'+wi+'_'+row">
                                     <template x-for="col in 16" :key="'aec'+ri+'_'+wi+'_'+row+'_'+col">
                                         <div class="angle-cell"
-                                             :class="getAngleText(pm, row-1, col-1) ? '' : 'angle-empty'"
-                                             :title="pm.name + ' DTK' + row + ' Cihaz' + col"
-                                             x-text="getAngleText(pm, row-1, col-1) || ''">
+                                             :class="getAngleText(pm, reverseRow(row)-1, col-1) ? '' : 'angle-empty'"
+                                             :title="pm.name + ' DTK' + reverseRow(row) + ' Cihaz' + col"
+                                             x-text="getAngleText(pm, reverseRow(row)-1, col-1) || ''">
                                         </div>
                                     </template>
                                 </template>
@@ -191,9 +191,9 @@
                                 <template x-for="row in 16" :key="'ter'+ri+'_'+wi+'_'+row">
                                     <template x-for="col in 16" :key="'tec'+ri+'_'+wi+'_'+row+'_'+col">
                                         <div class="time-cell"
-                                             :class="getTimeText(pm, row-1, col-1) ? '' : 'time-empty'"
-                                             :title="pm.name + ' DTK' + row + ' Cihaz' + col"
-                                             x-text="getTimeText(pm, row-1, col-1) || ''">
+                                             :class="getTimeText(pm, reverseRow(row)-1, col-1) ? '' : 'time-empty'"
+                                             :title="pm.name + ' DTK' + reverseRow(row) + ' Cihaz' + col"
+                                             x-text="getTimeText(pm, reverseRow(row)-1, col-1) || ''">
                                         </div>
                                     </template>
                                 </template>
