@@ -43,8 +43,15 @@ function trackerCluster() {
 
         // Bulk mode control
         bulk: {
-            selectedPMs: {},  // { pmIdx: true }
+            selectedPMs: {},
             selectedMode: null,
+            busy: false,
+            msg: '',
+        },
+        // Bulk angle control
+        bulkAngle: {
+            selectedPMs: {},
+            angle: '',
             busy: false,
             msg: '',
         },
@@ -289,6 +296,69 @@ function trackerCluster() {
 
             this.bulk.busy = false;
             this.bulk.msg = totalOk + '/' + totalAll + ' yazildi';
+            setTimeout(() => this.loadCluster(), 2000);
+        },
+
+        bulkAngleTogglePM(idx) {
+            this.bulkAngle.selectedPMs = Object.assign({}, this.bulkAngle.selectedPMs,
+                { [idx]: !this.bulkAngle.selectedPMs[idx] });
+        },
+
+        bulkAngleSelectAll() {
+            var all = {};
+            var allSelected = true;
+            for (var i = 0; i < this.cluster.length; i++) {
+                if (!this.bulkAngle.selectedPMs[i]) allSelected = false;
+                all[i] = true;
+            }
+            this.bulkAngle.selectedPMs = allSelected ? {} : all;
+        },
+
+        bulkAngleAllSelected() {
+            if (this.cluster.length === 0) return false;
+            for (var i = 0; i < this.cluster.length; i++) {
+                if (!this.bulkAngle.selectedPMs[i]) return false;
+            }
+            return true;
+        },
+
+        async bulkApplyAngle() {
+            var angle = parseFloat(this.bulkAngle.angle);
+            if (isNaN(angle) || angle < -60 || angle > 60) return;
+            var selected = [];
+            for (var i = 0; i < this.cluster.length; i++) {
+                if (this.bulkAngle.selectedPMs[i] && this.cluster[i].online) selected.push(this.cluster[i]);
+            }
+            if (selected.length === 0) return;
+
+            this.bulkAngle.busy = true;
+            this.bulkAngle.msg = 'Yaziliyor... (' + selected.length + ' santral)';
+
+            var promises = selected.map(function(pm) {
+                if (!pm.omegas) return Promise.resolve(null);
+                var ids = pm.omegas.map(function(o) { return o.id; });
+                var devices = [];
+                for (var d = 0; d < 16; d++) devices.push(d);
+                return fetch('http://' + pm.ip + ':8090/api/bulk/angle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ omega_ids: ids, devices: devices, angle: angle }),
+                }).then(function(r) { return r.json(); }).catch(function() { return null; });
+            });
+
+            var results = await Promise.all(promises);
+            var totalOk = 0, totalAll = 0;
+            for (var i = 0; i < results.length; i++) {
+                if (results[i] && results[i].results) {
+                    for (var j = 0; j < results[i].results.length; j++) {
+                        totalAll++;
+                        if (results[i].results[j].success) totalOk++;
+                    }
+                }
+            }
+
+            this.bulkAngle.busy = false;
+            this.bulkAngle.msg = totalOk + '/' + totalAll + ' yazildi';
             setTimeout(() => this.loadCluster(), 2000);
         },
 

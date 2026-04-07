@@ -122,6 +122,33 @@
                 <span class="refresh-info" x-show="loading">Yukleniyor...</span>
             </div>
 
+            <!-- Bulk angle control -->
+            <div class="form-box" style="margin-bottom:8px">
+                <div class="form-row" style="margin-bottom:4px">
+                    <span style="font-size:10px;color:#888;min-width:50px">Santral:</span>
+                    <button class="btn btn-sm" :class="bulkAngleAllSelected() ? 'btn-blue' : 'btn-mode-off'"
+                            @click="bulkAngleSelectAll()" style="font-size:9px;padding:2px 6px">TUMU</button>
+                    <template x-for="(pm, wi) in cluster" :key="'as'+wi">
+                        <button class="btn btn-sm"
+                                :class="bulkAngle.selectedPMs[wi] ? 'btn-blue' : 'btn-mode-off'"
+                                @click="bulkAngleTogglePM(wi)"
+                                style="font-size:9px;padding:2px 5px"
+                                x-text="wi+1"></button>
+                    </template>
+                </div>
+                <div class="form-row">
+                    <span style="font-size:10px;color:#888;min-width:50px">Aci:</span>
+                    <input type="number" x-model="bulkAngle.angle" min="-60" max="60" step="1" placeholder="derece" style="width:70px;font-size:11px">
+                    <span style="font-size:9px;color:#666">(-60 ~ +60)</span>
+                    <button class="btn btn-green btn-sm"
+                            :disabled="!bulkAngle.angle || bulkAngle.busy"
+                            @click="bulkApplyAngle()"
+                            style="font-size:10px;padding:3px 10px">GUNCELLE</button>
+                    <span class="refresh-info" x-show="bulkAngle.msg" x-text="bulkAngle.msg"
+                          :style="'color:' + (bulkAngle.busy ? '#FF9800' : '#4CAF50') + ';font-weight:bold'"></span>
+                </div>
+            </div>
+
             <template x-for="(pmRow, ri) in getPMRows()" :key="'ar'+ri">
                 <div class="block-row">
                     <template x-for="(pm, wi) in pmRow" :key="'ab'+ri+'_'+wi">
