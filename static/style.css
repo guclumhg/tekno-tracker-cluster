@@ -22,6 +22,10 @@ body { font-family: "Courier New", Courier, monospace; font-size: 13px; backgrou
 .pixel-grid { display: grid; grid-template-columns: repeat(16, 1fr); gap: 1px; }
 .pixel { width: 12px; height: 12px; border-radius: 1px; }
 
+.angle-grid { display: grid; grid-template-columns: repeat(16, 1fr); gap: 1px; }
+.angle-cell { width: 22px; height: 14px; font-size: 7px; text-align: center; line-height: 14px; color: #4FC3F7; background: #262626; border-radius: 1px; overflow: hidden; }
+.angle-empty { color: #333; background: #1e1e1e; }
+
 /* Toolbar */
 .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
 .btn { display: inline-block; padding: 5px 12px; border: none; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: bold; color: #fff; border-radius: 3px; }

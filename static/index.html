@@ -86,34 +86,32 @@
         <div x-show="currentTab === 'angles'">
             <div class="toolbar">
                 <button class="btn btn-blue btn-sm" @click="loadCluster()" :disabled="loading">YENILE</button>
+                <button class="btn btn-orange btn-sm" @click="manualPoll()" :disabled="loading">SUNUCU POLL</button>
+                <label class="toggle-label">
+                    <input type="checkbox" x-model="autoRefresh" @change="toggleAutoRefresh()">
+                    Otomatik
+                </label>
+                <span class="refresh-info" x-show="loading">Yukleniyor...</span>
             </div>
 
-            <template x-for="(wago, wi) in cluster" :key="'aw'+wi">
-                <div class="form-box" x-show="wago.online">
-                    <div class="form-title" x-text="wago.name"></div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>DTK</th>
-                                <template x-for="col in 16" :key="'ah'+wi+'_'+col">
-                                    <th style="text-align:center;min-width:30px" x-text="col"></th>
-                                </template>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template x-for="(omega, oi) in (wago.omegas || [])" :key="'ao'+wi+'_'+oi">
-                                <tr>
-                                    <td style="font-size:9px;white-space:nowrap" x-text="omega.name"></td>
-                                    <template x-for="col in 16" :key="'ac'+wi+'_'+oi+'_'+col">
-                                        <td style="text-align:center;font-size:9px;padding:2px"
-                                            x-text="getAngleText(wago, oi, col-1)"
-                                            :style="'color:' + (getAngleText(wago, oi, col-1) ? '#ccc' : '#333')">
-                                        </td>
+            <template x-for="(wagoRow, ri) in getWagoRows()" :key="'ar'+ri">
+                <div class="block-row">
+                    <template x-for="(wago, wi) in wagoRow" :key="'ab'+ri+'_'+wi">
+                        <div class="block">
+                            <a class="block-label" :href="'http://' + wago.ip + ':8090/'" target="_blank" x-text="wago.name" :style="'color:' + (wago.online ? '#4FC3F7' : '#555') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
+                            <div class="angle-grid">
+                                <template x-for="row in 16" :key="'aer'+ri+'_'+wi+'_'+row">
+                                    <template x-for="col in 16" :key="'aec'+ri+'_'+wi+'_'+row+'_'+col">
+                                        <div class="angle-cell"
+                                             :class="getAngleText(wago, row-1, col-1) ? '' : 'angle-empty'"
+                                             :title="wago.name + ' DTK' + row + ' Cihaz' + col"
+                                             x-text="getAngleText(wago, row-1, col-1) || ''">
+                                        </div>
                                     </template>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
                 </div>
             </template>
         </div>
