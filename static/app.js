@@ -240,47 +240,41 @@ function trackerCluster() {
 
         async bulkApplyMode() {
             if (this.bulk.selectedMode === null) return;
-            var selectedIdxs = [];
+            var selected = [];
             for (var i = 0; i < this.cluster.length; i++) {
-                if (this.bulk.selectedWagos[i] && this.cluster[i].online) selectedIdxs.push(i);
+                if (this.bulk.selectedWagos[i] && this.cluster[i].online) selected.push(this.cluster[i]);
             }
-            if (selectedIdxs.length === 0) return;
+            if (selected.length === 0) return;
 
             this.bulk.busy = true;
-            this.bulk.msg = '';
-            var totalOk = 0, totalAll = 0;
+            this.bulk.msg = 'Yaziliyor... (' + selected.length + ' santral)';
+            var mode = this.bulk.selectedMode;
 
-            for (var si = 0; si < selectedIdxs.length; si++) {
-                var idx = selectedIdxs[si];
-                var wago = this.cluster[idx];
-                this.bulk.msg = 'Yaziliyor: ' + wago.name + ' (' + (si + 1) + '/' + selectedIdxs.length + ')';
-
-                if (!wago.omegas) continue;
+            var promises = selected.map(function(wago) {
+                if (!wago.omegas) return Promise.resolve(null);
                 var ids = wago.omegas.map(function(o) { return o.id; });
                 var devices = [];
                 for (var d = 0; d < 16; d++) devices.push(d);
+                return fetch('http://' + wago.ip + ':8090/api/bulk/mode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ omega_ids: ids, devices: devices, mode: mode }),
+                }).then(function(r) { return r.json(); }).catch(function() { return null; });
+            });
 
-                try {
-                    var resp = await fetch('http://' + wago.ip + ':8090/api/bulk/mode', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ omega_ids: ids, devices: devices, mode: this.bulk.selectedMode }),
-                    });
-                    var data = await resp.json();
-                    if (data && data.results) {
-                        for (var j = 0; j < data.results.length; j++) {
-                            totalAll++;
-                            if (data.results[j].success) totalOk++;
-                        }
+            var results = await Promise.all(promises);
+            var totalOk = 0, totalAll = 0;
+            for (var i = 0; i < results.length; i++) {
+                if (results[i] && results[i].results) {
+                    for (var j = 0; j < results[i].results.length; j++) {
+                        totalAll++;
+                        if (results[i].results[j].success) totalOk++;
                     }
-                } catch (e) {
-                    console.error('Bulk mode error:', wago.name, e);
                 }
             }
 
             this.bulk.busy = false;
             this.bulk.msg = totalOk + '/' + totalAll + ' yazildi';
-            // Refresh after write
             setTimeout(() => this.loadCluster(), 2000);
         },
 
