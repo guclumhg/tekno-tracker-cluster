@@ -49,13 +49,10 @@ function trackerCluster() {
             msg: '',
         },
         bulkModes: [
-            { value: 0x00, label: 'FT', color: '#9E9E9E' },
             { value: 0x01, label: 'AST', color: '#4CAF50' },
-            { value: 0x05, label: 'NGT', color: '#673AB7' },
             { value: 0x06, label: 'WND', color: '#FF9800' },
             { value: 0x07, label: 'SNW', color: '#2196F3' },
             { value: 0x08, label: 'MNT', color: '#FFD600' },
-            { value: 0x09, label: 'ZRO', color: '#795548' },
         ],
 
         // Settings
