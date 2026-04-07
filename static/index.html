@@ -59,15 +59,14 @@
                 <span class="legend-item"><span class="legend-dot" style="background:#333"></span>OFF</span>
             </div>
 
-            <div class="block-group">
-                <!-- Left half: WAGO 1-8 -->
-                <div class="block-half">
-                    <template x-for="(wago, wi) in getLeftWagos()" :key="'lw'+wi">
+            <template x-for="(wagoRow, ri) in getWagoRows()" :key="'wr'+ri">
+                <div class="block-row">
+                    <template x-for="(wago, wi) in wagoRow" :key="'bw'+ri+'_'+wi">
                         <div class="block">
                             <div class="block-label" x-text="wago.name" :style="'color:' + (wago.online ? '#4FC3F7' : '#555')"></div>
                             <div class="pixel-grid">
-                                <template x-for="row in 16" :key="'lr'+wi+'_'+row">
-                                    <template x-for="col in 16" :key="'lc'+wi+'_'+row+'_'+col">
+                                <template x-for="row in 16" :key="'pr'+ri+'_'+wi+'_'+row">
+                                    <template x-for="col in 16" :key="'pc'+ri+'_'+wi+'_'+row+'_'+col">
                                         <div class="pixel"
                                              :style="'background:' + getPixelColor(wago, row-1, col-1)"
                                              :title="wago.name + ' DTK' + row + ' Cihaz' + col">
@@ -78,25 +77,7 @@
                         </div>
                     </template>
                 </div>
-                <!-- Right half: WAGO 9-15 -->
-                <div class="block-half">
-                    <template x-for="(wago, wi) in getRightWagos()" :key="'rw'+wi">
-                        <div class="block">
-                            <div class="block-label" x-text="wago.name" :style="'color:' + (wago.online ? '#4FC3F7' : '#555')"></div>
-                            <div class="pixel-grid">
-                                <template x-for="row in 16" :key="'rr'+wi+'_'+row">
-                                    <template x-for="col in 16" :key="'rc'+wi+'_'+row+'_'+col">
-                                        <div class="pixel"
-                                             :style="'background:' + getPixelColor(wago, row-1, col-1)"
-                                             :title="wago.name + ' DTK' + row + ' Cihaz' + col">
-                                        </div>
-                                    </template>
-                                </template>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
+            </template>
         </div>
 
         <!-- ============================================================ -->

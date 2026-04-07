@@ -95,12 +95,12 @@ function trackerCluster() {
             }
         },
 
-        // Build blocks: 15 wagos → split into left 8 + right 7 (or 8+7)
-        getLeftWagos() {
-            return this.cluster.slice(0, 8);
-        },
-        getRightWagos() {
-            return this.cluster.slice(8);
+        getWagoRows() {
+            var rows = [];
+            for (var i = 0; i < this.cluster.length; i += 5) {
+                rows.push(this.cluster.slice(i, i + 5));
+            }
+            return rows;
         },
 
         // Get pixel color for a specific device
