@@ -38,7 +38,6 @@
         <div x-show="currentTab === 'modes'">
             <div class="toolbar">
                 <button class="btn btn-blue btn-sm" @click="loadCluster()" :disabled="loading">YENILE</button>
-                <button class="btn btn-orange btn-sm" @click="manualPoll()" :disabled="loading">SUNUCU POLL</button>
                 <label class="toggle-label">
                     <input type="checkbox" x-model="autoRefresh" @change="toggleAutoRefresh()">
                     Otomatik
@@ -114,7 +113,6 @@
         <div x-show="currentTab === 'angles'">
             <div class="toolbar">
                 <button class="btn btn-blue btn-sm" @click="loadCluster()" :disabled="loading">YENILE</button>
-                <button class="btn btn-orange btn-sm" @click="manualPoll()" :disabled="loading">SUNUCU POLL</button>
                 <label class="toggle-label">
                     <input type="checkbox" x-model="autoRefresh" @change="toggleAutoRefresh()">
                     Otomatik
@@ -177,7 +175,6 @@
         <div x-show="currentTab === 'time'">
             <div class="toolbar">
                 <button class="btn btn-blue btn-sm" @click="loadCluster()" :disabled="loading">YENILE</button>
-                <button class="btn btn-orange btn-sm" @click="manualPoll()" :disabled="loading">SUNUCU POLL</button>
                 <label class="toggle-label">
                     <input type="checkbox" x-model="autoRefresh" @change="toggleAutoRefresh()">
                     Otomatik
