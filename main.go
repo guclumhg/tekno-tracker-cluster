@@ -39,7 +39,7 @@ func defaultConfig() AppConfig {
 	wagos := []WagoCfg{}
 	for i := 101; i <= 115; i++ {
 		wagos = append(wagos, WagoCfg{
-			Name: fmt.Sprintf("WAGO-%d", i),
+			Name: fmt.Sprintf("PlantManager-%d", i),
 			IP:   fmt.Sprintf("192.168.5.%d", i),
 		})
 	}
