@@ -43,7 +43,7 @@ function trackerCluster() {
 
         // Bulk mode control
         bulk: {
-            selectedWagos: {},  // { wagoIdx: true }
+            selectedPMs: {},  // { pmIdx: true }
             selectedMode: null,
             busy: false,
             msg: '',
@@ -109,35 +109,35 @@ function trackerCluster() {
             }
         },
 
-        getWagoRows() {
+        getPMRows() {
             return [this.cluster];
         },
 
         // Get pixel color for a specific device
-        getPixelColor(wago, omegaIdx, devIdx) {
-            if (!wago || !wago.online) return OFFLINE_COLOR;
-            if (!wago.omegas || omegaIdx >= wago.omegas.length) return NODATA_COLOR;
-            var omega = wago.omegas[omegaIdx];
+        getPixelColor(pm, omegaIdx, devIdx) {
+            if (!pm || !pm.online) return OFFLINE_COLOR;
+            if (!pm.omegas || omegaIdx >= pm.omegas.length) return NODATA_COLOR;
+            var omega = pm.omegas[omegaIdx];
             if (!omega || !omega.online) return OFFLINE_COLOR;
             if (!omega.devices || devIdx >= omega.devices.length) return NODATA_COLOR;
             return modePixelColor(omega.devices[devIdx]);
         },
 
         // Get angle text
-        getAngleText(wago, omegaIdx, devIdx) {
-            if (!wago || !wago.online) return '';
-            if (!wago.omegas || omegaIdx >= wago.omegas.length) return '';
-            var omega = wago.omegas[omegaIdx];
+        getAngleText(pm, omegaIdx, devIdx) {
+            if (!pm || !pm.online) return '';
+            if (!pm.omegas || omegaIdx >= pm.omegas.length) return '';
+            var omega = pm.omegas[omegaIdx];
             if (!omega || !omega.online || !omega.devices || devIdx >= omega.devices.length) return '';
             var dev = omega.devices[devIdx];
             if (!dev || dev.error || dev.angle === null || dev.angle === undefined) return '';
             return dev.angle + '';
         },
 
-        getTimeText(wago, omegaIdx, devIdx) {
-            if (!wago || !wago.online) return '';
-            if (!wago.omegas || omegaIdx >= wago.omegas.length) return '';
-            var omega = wago.omegas[omegaIdx];
+        getTimeText(pm, omegaIdx, devIdx) {
+            if (!pm || !pm.online) return '';
+            if (!pm.omegas || omegaIdx >= pm.omegas.length) return '';
+            var omega = pm.omegas[omegaIdx];
             if (!omega || !omega.online || !omega.devices || devIdx >= omega.devices.length) return '';
             var dev = omega.devices[devIdx];
             if (!dev || dev.error || !dev.time) return '';
@@ -151,11 +151,11 @@ function trackerCluster() {
 
         // Total stats
         getStats() {
-            var total = 0, online = 0, error = 0, wagosOnline = 0;
+            var total = 0, online = 0, error = 0, pmsOnline = 0;
             var mc = { 0: 0, 1: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
             for (var i = 0; i < this.cluster.length; i++) {
                 var w = this.cluster[i];
-                if (w.online) wagosOnline++;
+                if (w.online) pmsOnline++;
                 if (!w.omegas) continue;
                 for (var j = 0; j < w.omegas.length; j++) {
                     var o = w.omegas[j];
@@ -181,7 +181,7 @@ function trackerCluster() {
                 { label: 'ZRO', count: mc[9], color: '#795548' },
                 { label: 'ERR', count: error, color: '#D32F2F' },
             ];
-            return { total: total, online: online, error: error, wagosOnline: wagosOnline, wagosTotal: this.cluster.length, modeCounts: modeCounts };
+            return { total: total, online: online, error: error, pmsOnline: pmsOnline, pmsTotal: this.cluster.length, modeCounts: modeCounts };
         },
 
         // Settings
@@ -219,29 +219,29 @@ function trackerCluster() {
             this.settings.saving = false;
         },
 
-        bulkToggleWago(idx) {
-            this.bulk.selectedWagos = Object.assign({}, this.bulk.selectedWagos,
-                { [idx]: !this.bulk.selectedWagos[idx] });
+        bulkTogglePM(idx) {
+            this.bulk.selectedPMs = Object.assign({}, this.bulk.selectedPMs,
+                { [idx]: !this.bulk.selectedPMs[idx] });
         },
 
         bulkSelectAll() {
             var all = {};
             var allSelected = true;
             for (var i = 0; i < this.cluster.length; i++) {
-                if (!this.bulk.selectedWagos[i]) allSelected = false;
+                if (!this.bulk.selectedPMs[i]) allSelected = false;
                 all[i] = true;
             }
             if (allSelected) {
-                this.bulk.selectedWagos = {};
+                this.bulk.selectedPMs = {};
             } else {
-                this.bulk.selectedWagos = all;
+                this.bulk.selectedPMs = all;
             }
         },
 
         bulkAllSelected() {
             if (this.cluster.length === 0) return false;
             for (var i = 0; i < this.cluster.length; i++) {
-                if (!this.bulk.selectedWagos[i]) return false;
+                if (!this.bulk.selectedPMs[i]) return false;
             }
             return true;
         },
@@ -254,7 +254,7 @@ function trackerCluster() {
             if (this.bulk.selectedMode === null) return;
             var selected = [];
             for (var i = 0; i < this.cluster.length; i++) {
-                if (this.bulk.selectedWagos[i] && this.cluster[i].online) selected.push(this.cluster[i]);
+                if (this.bulk.selectedPMs[i] && this.cluster[i].online) selected.push(this.cluster[i]);
             }
             if (selected.length === 0) return;
 
@@ -262,12 +262,12 @@ function trackerCluster() {
             this.bulk.msg = 'Yaziliyor... (' + selected.length + ' santral)';
             var mode = this.bulk.selectedMode;
 
-            var promises = selected.map(function(wago) {
-                if (!wago.omegas) return Promise.resolve(null);
-                var ids = wago.omegas.map(function(o) { return o.id; });
+            var promises = selected.map(function(pm) {
+                if (!pm.omegas) return Promise.resolve(null);
+                var ids = pm.omegas.map(function(o) { return o.id; });
                 var devices = [];
                 for (var d = 0; d < 16; d++) devices.push(d);
-                return fetch('http://' + wago.ip + ':8090/api/bulk/mode', {
+                return fetch('http://' + pm.ip + ':8090/api/bulk/mode', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ omega_ids: ids, devices: devices, mode: mode }),
@@ -290,12 +290,12 @@ function trackerCluster() {
             setTimeout(() => this.loadCluster(), 2000);
         },
 
-        async toggleBR(wagoIp, omegaId, enabled, interval) {
+        async toggleBR(pmIp, omegaId, enabled, interval) {
             try {
                 await fetch('/api/br-settings', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ wago_ip: wagoIp, omega_id: omegaId, enabled: enabled, interval: interval || 60 }),
+                    body: JSON.stringify({ pm_ip: pmIp, omega_id: omegaId, enabled: enabled, interval: interval || 60 }),
                 });
             } catch (e) {}
         },

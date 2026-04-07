@@ -18,7 +18,7 @@ import (
 // Config
 // ---------------------------------------------------------------------------
 
-type WagoCfg struct {
+type PMCfg struct {
 	Name string `json:"name"`
 	IP   string `json:"ip"`
 }
@@ -26,7 +26,7 @@ type WagoCfg struct {
 type AppConfig struct {
 	Port         int       `json:"port"`
 	PollInterval int       `json:"poll_interval"` // seconds
-	Wagos        []WagoCfg `json:"wagos"`
+	PlantManagers        []PMCfg `json:"plant_managers"`
 }
 
 var (
@@ -36,9 +36,9 @@ var (
 )
 
 func defaultConfig() AppConfig {
-	wagos := []WagoCfg{}
+	pms := []PMCfg{}
 	for i := 101; i <= 115; i++ {
-		wagos = append(wagos, WagoCfg{
+		pms = append(pms, PMCfg{
 			Name: fmt.Sprintf("PlantManager-%d", i),
 			IP:   fmt.Sprintf("192.168.5.%d", i),
 		})
@@ -46,7 +46,7 @@ func defaultConfig() AppConfig {
 	return AppConfig{
 		Port:         8095,
 		PollInterval: 60,
-		Wagos:        wagos,
+		PlantManagers:        pms,
 	}
 }
 
@@ -62,7 +62,7 @@ func loadConfig() {
 	if err := json.Unmarshal(data, &config); err != nil {
 		config = defaultConfig()
 	}
-	if len(config.Wagos) == 0 {
+	if len(config.PlantManagers) == 0 {
 		config = defaultConfig()
 		saveConfig()
 	}
@@ -94,7 +94,7 @@ type OmegaData struct {
 	Online      bool         `json:"online"`
 }
 
-type WagoSnapshot struct {
+type PMSnapshot struct {
 	Name       string      `json:"name"`
 	IP         string      `json:"ip"`
 	Omegas     []OmegaData `json:"omegas"`
@@ -103,7 +103,7 @@ type WagoSnapshot struct {
 }
 
 var (
-	clusterData   []WagoSnapshot
+	clusterData   []PMSnapshot
 	clusterDataMu sync.RWMutex
 )
 
@@ -137,14 +137,14 @@ func inclinationToDegrees(val int) int {
 	return int(math.Round(math.Asin(inc) * 180.0 / math.Pi))
 }
 
-func pollOneWago(wago WagoCfg) WagoSnapshot {
-	snap := WagoSnapshot{
-		Name:       wago.Name,
-		IP:         wago.IP,
+func pollOnePM(pm PMCfg) PMSnapshot {
+	snap := PMSnapshot{
+		Name:       pm.Name,
+		IP:         pm.IP,
 		LastUpdate: time.Now().Format("15:04:05"),
 	}
 
-	baseURL := fmt.Sprintf("http://%s:8090", wago.IP)
+	baseURL := fmt.Sprintf("http://%s:8090", pm.IP)
 
 	var omegas []struct {
 		ID          int    `json:"id"`
@@ -224,32 +224,32 @@ func pollOneWago(wago WagoCfg) WagoSnapshot {
 	return snap
 }
 
-func pollAllWagos() {
+func pollAllPlantManagers() {
 	configMu.RLock()
-	wagos := make([]WagoCfg, len(config.Wagos))
-	copy(wagos, config.Wagos)
+	pms := make([]PMCfg, len(config.PlantManagers))
+	copy(pms, config.PlantManagers)
 	configMu.RUnlock()
 
-	results := make([]WagoSnapshot, len(wagos))
+	results := make([]PMSnapshot, len(pms))
 	var wg sync.WaitGroup
-	for i, w := range wagos {
+	for i, p := range pms {
 		wg.Add(1)
-		go func(idx int, wago WagoCfg) {
+		go func(idx int, pm PMCfg) {
 			defer wg.Done()
-			results[idx] = pollOneWago(wago)
-		}(i, w)
+			results[idx] = pollOnePM(pm)
+		}(i, p)
 	}
 	wg.Wait()
 
 	clusterDataMu.Lock()
 	clusterData = results
 	clusterDataMu.Unlock()
-	log.Printf("[POLL] %d WAGO polled", len(results))
+	log.Printf("[POLL] %d PlantManager polled", len(results))
 }
 
 func startPoller() {
 	go func() {
-		pollAllWagos()
+		pollAllPlantManagers()
 		for {
 			configMu.RLock()
 			interval := config.PollInterval
@@ -258,7 +258,7 @@ func startPoller() {
 				interval = 5
 			}
 			time.Sleep(time.Duration(interval) * time.Second)
-			pollAllWagos()
+			pollAllPlantManagers()
 		}
 	}()
 }
@@ -295,7 +295,7 @@ func pollHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "POST only", 405)
 		return
 	}
-	go pollAllWagos()
+	go pollAllPlantManagers()
 	writeJSONResp(w, map[string]bool{"ok": true})
 }
 
@@ -334,7 +334,7 @@ func brSettingsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Body bos", 400)
 		return
 	}
-	wagoIP, _ := body["wago_ip"].(string)
+	pmIP, _ := body["pm_ip"].(string)
 	omegaID := 0
 	if v, ok := body["omega_id"].(float64); ok {
 		omegaID = int(v)
@@ -345,7 +345,7 @@ func brSettingsHandler(w http.ResponseWriter, r *http.Request) {
 		interval = int(v)
 	}
 
-	url := fmt.Sprintf("http://%s:8090/api/omega/%d/config", wagoIP, omegaID)
+	url := fmt.Sprintf("http://%s:8090/api/omega/%d/config", pmIP, omegaID)
 	payload, _ := json.Marshal(map[string]interface{}{
 		"background_reader_enabled":  enabled,
 		"background_reader_interval": interval,
@@ -398,7 +398,7 @@ func main() {
 
 	addr := fmt.Sprintf("0.0.0.0:%d", config.Port)
 	log.Printf("Tekno Tracker Cluster starting on %s", addr)
-	log.Printf("  WAGOs: %d, Poll: %ds", len(config.Wagos), config.PollInterval)
+	log.Printf("  PlantManagers: %d, Poll: %ds", len(config.PlantManagers), config.PollInterval)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

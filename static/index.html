@@ -15,10 +15,7 @@
     <header class="header">
         <h1>TEKNO TRACKER CLUSTER</h1>
         <div class="header-right">
-            <span x-text="'PlantManager: ' + getStats().wagosOnline + '/' + getStats().wagosTotal"></span>
-            <template x-for="ms in getStats().modeCounts" :key="'mc'+ms.label">
-                <span :style="'color:' + ms.color" x-text="ms.label + ':' + ms.count"></span>
-            </template>
+            <span x-text="'PlantManager: ' + getStats().pmsOnline + '/' + getStats().pmsTotal"></span>
             <span x-show="lastPoll" x-text="'Son: ' + lastPoll" style="color:#666"></span>
         </div>
     </header>
@@ -55,10 +52,10 @@
                     <span style="font-size:10px;color:#888;min-width:50px">Santral:</span>
                     <button class="btn btn-sm" :class="bulkAllSelected() ? 'btn-blue' : 'btn-mode-off'"
                             @click="bulkSelectAll()" style="font-size:9px;padding:2px 6px">TUMU</button>
-                    <template x-for="(wago, wi) in cluster" :key="'bs'+wi">
+                    <template x-for="(pm, wi) in cluster" :key="'bs'+wi">
                         <button class="btn btn-sm"
-                                :class="bulk.selectedWagos[wi] ? 'btn-blue' : 'btn-mode-off'"
-                                @click="bulkToggleWago(wi)"
+                                :class="bulk.selectedPMs[wi] ? 'btn-blue' : 'btn-mode-off'"
+                                @click="bulkTogglePM(wi)"
                                 style="font-size:9px;padding:2px 5px"
                                 x-text="wi+1"></button>
                     </template>
@@ -82,28 +79,26 @@
             </div>
 
             <div class="legend">
-                <span class="legend-item"><span class="legend-dot" style="background:#9E9E9E"></span>FT</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#4CAF50"></span>AST</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#673AB7"></span>NGT</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#FF9800"></span>WND</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#2196F3"></span>SNW</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#FFD600"></span>MNT</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#795548"></span>ZRO</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#D32F2F"></span>ERR</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#333"></span>OFF</span>
+                <template x-for="ms in getStats().modeCounts" :key="'lg'+ms.label">
+                    <span class="legend-item">
+                        <span class="legend-dot" :style="'background:' + ms.color"></span>
+                        <span :style="'color:' + ms.color" x-text="ms.label + ':' + ms.count"></span>
+                    </span>
+                </template>
+                <span class="legend-item"><span class="legend-dot" style="background:#333"></span><span style="color:#555">OFF</span></span>
             </div>
 
-            <template x-for="(wagoRow, ri) in getWagoRows()" :key="'wr'+ri">
+            <template x-for="(pmRow, ri) in getPMRows()" :key="'wr'+ri">
                 <div class="block-row">
-                    <template x-for="(wago, wi) in wagoRow" :key="'bw'+ri+'_'+wi">
+                    <template x-for="(pm, wi) in pmRow" :key="'bw'+ri+'_'+wi">
                         <div class="block">
-                            <a class="block-label" :href="'http://' + wago.ip + ':8090/'" target="_blank" x-text="wago.name" :style="'color:' + (wago.online ? '#4FC3F7' : '#555') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
+                            <a class="block-label" :href="'http://' + pm.ip + ':8090/'" target="_blank" x-text="pm.name" :style="'color:' + (pm.online ? '#4FC3F7' : '#555') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
                             <div class="pixel-grid">
                                 <template x-for="row in 16" :key="'pr'+ri+'_'+wi+'_'+row">
                                     <template x-for="col in 16" :key="'pc'+ri+'_'+wi+'_'+row+'_'+col">
                                         <div class="pixel"
-                                             :style="'background:' + getPixelColor(wago, row-1, col-1)"
-                                             :title="wago.name + ' DTK' + row + ' Cihaz' + col">
+                                             :style="'background:' + getPixelColor(pm, row-1, col-1)"
+                                             :title="pm.name + ' DTK' + row + ' Cihaz' + col">
                                         </div>
                                     </template>
                                 </template>
@@ -128,18 +123,18 @@
                 <span class="refresh-info" x-show="loading">Yukleniyor...</span>
             </div>
 
-            <template x-for="(wagoRow, ri) in getWagoRows()" :key="'ar'+ri">
+            <template x-for="(pmRow, ri) in getPMRows()" :key="'ar'+ri">
                 <div class="block-row">
-                    <template x-for="(wago, wi) in wagoRow" :key="'ab'+ri+'_'+wi">
+                    <template x-for="(pm, wi) in pmRow" :key="'ab'+ri+'_'+wi">
                         <div class="block">
-                            <a class="block-label" :href="'http://' + wago.ip + ':8090/'" target="_blank" x-text="wago.name" :style="'color:' + (wago.online ? '#4FC3F7' : '#555') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
+                            <a class="block-label" :href="'http://' + pm.ip + ':8090/'" target="_blank" x-text="pm.name" :style="'color:' + (pm.online ? '#4FC3F7' : '#555') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
                             <div class="angle-grid">
                                 <template x-for="row in 16" :key="'aer'+ri+'_'+wi+'_'+row">
                                     <template x-for="col in 16" :key="'aec'+ri+'_'+wi+'_'+row+'_'+col">
                                         <div class="angle-cell"
-                                             :class="getAngleText(wago, row-1, col-1) ? '' : 'angle-empty'"
-                                             :title="wago.name + ' DTK' + row + ' Cihaz' + col"
-                                             x-text="getAngleText(wago, row-1, col-1) || ''">
+                                             :class="getAngleText(pm, row-1, col-1) ? '' : 'angle-empty'"
+                                             :title="pm.name + ' DTK' + row + ' Cihaz' + col"
+                                             x-text="getAngleText(pm, row-1, col-1) || ''">
                                         </div>
                                     </template>
                                 </template>
@@ -164,18 +159,18 @@
                 <span class="refresh-info" x-show="loading">Yukleniyor...</span>
             </div>
 
-            <template x-for="(wagoRow, ri) in getWagoRows()" :key="'tr'+ri">
+            <template x-for="(pmRow, ri) in getPMRows()" :key="'tr'+ri">
                 <div class="block-row">
-                    <template x-for="(wago, wi) in wagoRow" :key="'tb'+ri+'_'+wi">
+                    <template x-for="(pm, wi) in pmRow" :key="'tb'+ri+'_'+wi">
                         <div class="block">
-                            <a class="block-label" :href="'http://' + wago.ip + ':8090/'" target="_blank" x-text="wago.name" :style="'color:' + (wago.online ? '#4FC3F7' : '#555') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
+                            <a class="block-label" :href="'http://' + pm.ip + ':8090/'" target="_blank" x-text="pm.name" :style="'color:' + (pm.online ? '#4FC3F7' : '#555') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
                             <div class="time-grid">
                                 <template x-for="row in 16" :key="'ter'+ri+'_'+wi+'_'+row">
                                     <template x-for="col in 16" :key="'tec'+ri+'_'+wi+'_'+row+'_'+col">
                                         <div class="time-cell"
-                                             :class="getTimeText(wago, row-1, col-1) ? '' : 'time-empty'"
-                                             :title="wago.name + ' DTK' + row + ' Cihaz' + col"
-                                             x-text="getTimeText(wago, row-1, col-1) || ''">
+                                             :class="getTimeText(pm, row-1, col-1) ? '' : 'time-empty'"
+                                             :title="pm.name + ' DTK' + row + ' Cihaz' + col"
+                                             x-text="getTimeText(pm, row-1, col-1) || ''">
                                         </div>
                                     </template>
                                 </template>
