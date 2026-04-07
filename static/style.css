@@ -40,6 +40,7 @@ body { font-family: "Courier New", Courier, monospace; font-size: 13px; backgrou
 .btn-green { background: #388E3C; }
 .btn-red { background: #D32F2F; }
 .btn-sm { padding: 3px 8px; font-size: 10px; }
+.btn-mode-off { background: #444; color: #888; }
 
 /* Form */
 .form-box { background: #212121; border: 1px solid #333; padding: 10px 12px; margin-bottom: 10px; }

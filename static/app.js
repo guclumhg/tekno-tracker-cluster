@@ -41,6 +41,23 @@ function trackerCluster() {
             { id: 'settings', label: 'Ayarlar' },
         ],
 
+        // Bulk mode control
+        bulk: {
+            selectedWagos: {},  // { wagoIdx: true }
+            selectedMode: null,
+            busy: false,
+            msg: '',
+        },
+        bulkModes: [
+            { value: 0x00, label: 'FT', color: '#9E9E9E' },
+            { value: 0x01, label: 'AST', color: '#4CAF50' },
+            { value: 0x05, label: 'NGT', color: '#673AB7' },
+            { value: 0x06, label: 'WND', color: '#FF9800' },
+            { value: 0x07, label: 'SNW', color: '#2196F3' },
+            { value: 0x08, label: 'MNT', color: '#FFD600' },
+            { value: 0x09, label: 'ZRO', color: '#795548' },
+        ],
+
         // Settings
         settings: {
             poll_interval: 60,
@@ -192,6 +209,83 @@ function trackerCluster() {
                 this.settings.msg = 'Hata';
             }
             this.settings.saving = false;
+        },
+
+        bulkToggleWago(idx) {
+            this.bulk.selectedWagos = Object.assign({}, this.bulk.selectedWagos,
+                { [idx]: !this.bulk.selectedWagos[idx] });
+        },
+
+        bulkSelectAll() {
+            var all = {};
+            var allSelected = true;
+            for (var i = 0; i < this.cluster.length; i++) {
+                if (!this.bulk.selectedWagos[i]) allSelected = false;
+                all[i] = true;
+            }
+            if (allSelected) {
+                this.bulk.selectedWagos = {};
+            } else {
+                this.bulk.selectedWagos = all;
+            }
+        },
+
+        bulkAllSelected() {
+            if (this.cluster.length === 0) return false;
+            for (var i = 0; i < this.cluster.length; i++) {
+                if (!this.bulk.selectedWagos[i]) return false;
+            }
+            return true;
+        },
+
+        bulkSelectMode(val) {
+            this.bulk.selectedMode = (this.bulk.selectedMode === val) ? null : val;
+        },
+
+        async bulkApplyMode() {
+            if (this.bulk.selectedMode === null) return;
+            var selectedIdxs = [];
+            for (var i = 0; i < this.cluster.length; i++) {
+                if (this.bulk.selectedWagos[i] && this.cluster[i].online) selectedIdxs.push(i);
+            }
+            if (selectedIdxs.length === 0) return;
+
+            this.bulk.busy = true;
+            this.bulk.msg = '';
+            var totalOk = 0, totalAll = 0;
+
+            for (var si = 0; si < selectedIdxs.length; si++) {
+                var idx = selectedIdxs[si];
+                var wago = this.cluster[idx];
+                this.bulk.msg = 'Yaziliyor: ' + wago.name + ' (' + (si + 1) + '/' + selectedIdxs.length + ')';
+
+                if (!wago.omegas) continue;
+                var ids = wago.omegas.map(function(o) { return o.id; });
+                var devices = [];
+                for (var d = 0; d < 16; d++) devices.push(d);
+
+                try {
+                    var resp = await fetch('http://' + wago.ip + ':8090/api/bulk/mode', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ omega_ids: ids, devices: devices, mode: this.bulk.selectedMode }),
+                    });
+                    var data = await resp.json();
+                    if (data && data.results) {
+                        for (var j = 0; j < data.results.length; j++) {
+                            totalAll++;
+                            if (data.results[j].success) totalOk++;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Bulk mode error:', wago.name, e);
+                }
+            }
+
+            this.bulk.busy = false;
+            this.bulk.msg = totalOk + '/' + totalAll + ' yazildi';
+            // Refresh after write
+            setTimeout(() => this.loadCluster(), 2000);
         },
 
         async toggleBR(wagoIp, omegaId, enabled, interval) {
