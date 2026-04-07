@@ -151,7 +151,7 @@ function trackerCluster() {
 
         // Total stats
         getStats() {
-            var total = 0, online = 0, error = 0, pmsOnline = 0;
+            var total = 0, online = 0, error = 0, offline = 0, pmsOnline = 0;
             var mc = { 0: 0, 1: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
             for (var i = 0; i < this.cluster.length; i++) {
                 var w = this.cluster[i];
@@ -163,7 +163,8 @@ function trackerCluster() {
                     for (var k = 0; k < o.devices.length; k++) {
                         total++;
                         var d = o.devices[k];
-                        if (d.error) { error++; }
+                        if (!w.online || !o.online) { offline++; }
+                        else if (d.error) { error++; }
                         else {
                             online++;
                             if (d.mode !== null && d.mode !== undefined && mc[d.mode] !== undefined) mc[d.mode]++;
@@ -180,8 +181,9 @@ function trackerCluster() {
                 { label: 'MNT', count: mc[8], color: '#FFD600' },
                 { label: 'ZRO', count: mc[9], color: '#795548' },
                 { label: 'ERR', count: error, color: '#D32F2F' },
+                { label: 'OFF', count: offline, color: '#555' },
             ];
-            return { total: total, online: online, error: error, pmsOnline: pmsOnline, pmsTotal: this.cluster.length, modeCounts: modeCounts };
+            return { total: total, online: online, error: error, offline: offline, pmsOnline: pmsOnline, pmsTotal: this.cluster.length, modeCounts: modeCounts };
         },
 
         // Settings
