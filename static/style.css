@@ -4,73 +4,130 @@
  *
  * Designed and Written by Muhammed Hasan GUCLU - 2026
  */
+
+/* Global sifirlama — tum elemanlarda tutarli bosluk ve kutu modeli */
 * { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Ana govde — monospace font, koyu arka plan, SCADA tarzinda gorunum */
 body { font-family: "Courier New", Courier, monospace; font-size: 13px; background: #1a1a1a; color: #ccc; }
 
+/* --------------------------------------------------------------------------- */
+/* Header — Sayfa ust cubugu, baslik ve sag taraf bilgileri                    */
+/* --------------------------------------------------------------------------- */
 .header { background: #263238; color: #fff; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; }
 .header h1 { font-size: 14px; letter-spacing: 1px; }
 .header-right { display: flex; align-items: center; gap: 10px; font-size: 11px; }
 
+/* --------------------------------------------------------------------------- */
+/* Sekmeler — Mod/Aci/Zaman/Ayarlar sekme butonlari                           */
+/* --------------------------------------------------------------------------- */
 .tabs { display: flex; background: #212121; border-bottom: 2px solid #333; padding: 0 8px; }
+/* Tek bir sekme butonu — aktif olmadiginda soluk, hover'da mavi */
 .tab-btn { background: transparent; color: #888; border: none; padding: 8px 14px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: bold; border-bottom: 3px solid transparent; margin-bottom: -2px; }
 .tab-btn:hover { color: #4FC3F7; }
+/* Aktif sekme — alt cizgi ve mavi renk ile belirginlestirilir */
 .tab-btn.active { color: #4FC3F7; border-bottom-color: #4FC3F7; }
 
+/* --------------------------------------------------------------------------- */
+/* Icerik alani — Sekme iceriginin gosterildigi bolge                          */
+/* --------------------------------------------------------------------------- */
 .content { padding: 12px 16px; }
 .page-title { font-size: 13px; font-weight: bold; margin-bottom: 10px; color: #4FC3F7; }
 
-/* Pixel grid */
+/* --------------------------------------------------------------------------- */
+/* Pixel Grid — Mod haritasi grid gorunumu                                     */
+/* Her PM bir blok, her Omega bir satir, her cihaz 12x12px bir pixel           */
+/* --------------------------------------------------------------------------- */
 .cluster-grid { display: flex; flex-wrap: wrap; gap: 2px; }
+/* Blok satiri — PM bloklarini yatayda merkezli siralar */
 .block-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; justify-content: center; }
 .block-title { font-size: 10px; color: #666; margin-bottom: 2px; text-align: center; }
+/* Tek bir PM bloku */
 .block { display: inline-block; margin: 2px; vertical-align: top; }
+/* Omega etiket satiri — PM/Omega ismini gosterir */
 .block-label { font-size: 8px; color: #555; text-align: center; margin-bottom: 1px; white-space: nowrap; overflow: hidden; }
+/* 16 sutunlu grid — her Omega'nin 16 cihazi yan yana gosterilir */
 .pixel-grid { display: grid; grid-template-columns: repeat(16, 1fr); gap: 1px; }
+/* Tek bir pixel — rengi cihazin moduna gore dinamik ayarlanir */
 .pixel { width: 12px; height: 12px; border-radius: 1px; }
 
+/* --------------------------------------------------------------------------- */
+/* Aci Grid — Her hucrede cihazin aci degeri (derece)                          */
+/* --------------------------------------------------------------------------- */
 .angle-grid { display: grid; grid-template-columns: repeat(16, 1fr); gap: 1px; }
+/* Aci hucreleri — mavi tonlu, kucuk font ile sayi gosterir */
 .angle-cell { width: 22px; height: 14px; font-size: 7px; text-align: center; line-height: 14px; color: #4FC3F7; background: #262626; border-radius: 1px; overflow: hidden; }
+/* Bos aci hucresi — veri yoksa soluk gorunur */
 .angle-empty { color: #333; background: #1e1e1e; }
 
+/* --------------------------------------------------------------------------- */
+/* Zaman Grid — Her hucrede cihazin saat bilgisi (SS:DD)                       */
+/* --------------------------------------------------------------------------- */
 .time-grid { display: grid; grid-template-columns: repeat(16, 1fr); gap: 1px; }
+/* Zaman hucreleri — yesil tonlu, biraz daha genis (saat:dakika icin) */
 .time-cell { width: 28px; height: 14px; font-size: 7px; text-align: center; line-height: 14px; color: #81C784; background: #262626; border-radius: 1px; overflow: hidden; }
+/* Bos zaman hucresi */
 .time-empty { color: #333; background: #1e1e1e; }
 
-/* Toolbar */
+/* --------------------------------------------------------------------------- */
+/* Toolbar — Sayfa ust araclari (Yenile butonu, otomatik yenileme vb.)         */
+/* --------------------------------------------------------------------------- */
 .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+
+/* --------------------------------------------------------------------------- */
+/* Butonlar — Farkli renk ve boyut varyantlari                                */
+/* --------------------------------------------------------------------------- */
 .btn { display: inline-block; padding: 5px 12px; border: none; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: bold; color: #fff; border-radius: 3px; }
 .btn:hover { opacity: 0.85; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* Renk varyantlari — islem turune gore: mavi=genel, turuncu=dikkat, yesil=onayla, kirmizi=uyari */
 .btn-blue { background: #1976D2; }
 .btn-orange { background: #F57C00; }
 .btn-green { background: #388E3C; }
 .btn-red { background: #D32F2F; }
+/* Kucuk buton ve pasif mod butonu */
 .btn-sm { padding: 3px 8px; font-size: 10px; }
 .btn-mode-off { background: #444; color: #888; }
 
-/* Form */
+/* --------------------------------------------------------------------------- */
+/* Form alanlari — Ayarlar ve toplu islem formlari                             */
+/* --------------------------------------------------------------------------- */
 .form-box { background: #212121; border: 1px solid #333; padding: 10px 12px; margin-bottom: 10px; }
 .form-title { font-weight: bold; font-size: 12px; margin-bottom: 6px; color: #4FC3F7; }
 .form-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
 .form-row label { font-size: 11px; color: #888; }
+/* Input ve select elemanlari — koyu tema uyumlu */
 input, select { font-family: inherit; font-size: 11px; padding: 4px 6px; border: 1px solid #444; background: #2a2a2a; color: #ccc; border-radius: 3px; }
+/* Focus durumunda mavi border — aktif alani belirginlestirir */
 input:focus, select:focus { outline: none; border-color: #4FC3F7; }
+/* Form mesajlari — kayit sonucu veya hata bildirimi */
 .form-msg { font-size: 11px; color: #F57C00; }
 .refresh-info { font-size: 10px; color: #666; }
 
-/* Legend */
+/* --------------------------------------------------------------------------- */
+/* Legend — Mod renkleri aciklamasi (grid altinda gosterilir)                   */
+/* --------------------------------------------------------------------------- */
 .legend { display: flex; gap: 10px; margin-bottom: 8px; font-size: 10px; }
 .legend-item { display: flex; align-items: center; gap: 3px; }
+/* Renk kutucugu — moda karsilik gelen rengi gosterir */
 .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 1px; }
 
-/* Table */
+/* --------------------------------------------------------------------------- */
+/* Tablo — Ayarlar sekmesindeki PM listesi tablosu                             */
+/* --------------------------------------------------------------------------- */
 table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 12px; background: #212121; }
 th, td { padding: 5px 8px; text-align: left; border: 1px solid #333; }
 th { background: #263238; color: #4FC3F7; font-weight: bold; font-size: 10px; }
 tr:hover { background: #2a2a2a; }
 
+/* --------------------------------------------------------------------------- */
+/* Toggle — Checkbox etiketleri (otomatik yenileme, PM secimi vb.)             */
+/* --------------------------------------------------------------------------- */
 .toggle-label { display: flex; align-items: center; gap: 4px; font-size: 11px; cursor: pointer; }
 .toggle-label input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; }
 
+/* --------------------------------------------------------------------------- */
+/* Durum mesajlari — Yukleniyor ve bos veri gosterimleri                       */
+/* --------------------------------------------------------------------------- */
 .loading { color: #666; font-style: italic; padding: 20px 0; text-align: center; }
 .placeholder { color: #555; font-style: italic; padding: 40px 0; text-align: center; border: 1px dashed #333; }

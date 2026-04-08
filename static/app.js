@@ -6,6 +6,12 @@
  * Designed and Written by Muhammed Hasan GUCLU - 2026
  */
 
+// ---------------------------------------------------------------------------
+// Sabitler — Mod renkleri, mod isimleri ve ozel durum renkleri
+// ---------------------------------------------------------------------------
+
+// MODE_COLORS: Her tracker modunun pixel grid'deki rengi.
+// Mod numaralari Modbus holding register'dan gelir.
 var MODE_COLORS = {
     0: '#9E9E9E',  // First Test
     1: '#4CAF50',  // Astronom
@@ -15,29 +21,46 @@ var MODE_COLORS = {
     8: '#FFD600',  // Maintenance
     9: '#795548',  // Zero Angle
 };
+
+// MODE_NAMES: Mod numarasinin okunabilir isim karsiligi
 var MODE_NAMES = {
     0: 'First Test', 1: 'Astronom', 5: 'Night', 6: 'Wind',
     7: 'Snow', 8: 'Maintenance', 9: 'Zero Angle',
 };
-var ERR_COLOR = '#D32F2F';
-var OFFLINE_COLOR = '#333';
-var NODATA_COLOR = '#1a1a1a';
 
+// Ozel durum renkleri
+var ERR_COLOR = '#D32F2F';     // Hata olan cihazlar icin kirmizi
+var OFFLINE_COLOR = '#333';     // Cevrimdisi PM/Omega icin koyu gri
+var NODATA_COLOR = '#1a1a1a';   // Veri gelmemis cihazlar icin arka plan rengi
+
+// modePixelColor: Bir cihazin mod degerine gore pixel rengini dondurur.
+// Hata varsa kirmizi, mod bilinmiyorsa gri tonlari kullanilir.
 function modePixelColor(dev) {
     if (!dev || dev.error) return ERR_COLOR;
     if (dev.mode === null || dev.mode === undefined) return NODATA_COLOR;
     return MODE_COLORS[dev.mode] || '#555';
 }
 
+// ---------------------------------------------------------------------------
+// Alpine.js Ana Bileseni — trackerCluster()
+// Tum uygulama durumunu ve islevlerini icerir.
+// ---------------------------------------------------------------------------
 function trackerCluster() {
     return {
+        // Aktif sekme: modes / angles / time / settings
         currentTab: 'modes',
+        // Tum PM verileri — /api/cluster'dan gelen dizi
         cluster: [],
+        // Veri yukleniyor mu gostergesi
         loading: false,
+        // Son veri cekilme zamani (goruntulenecek)
         lastPoll: '',
+        // Otomatik yenileme acik/kapali
         autoRefresh: true,
+        // Otomatik yenileme timer referansi
         _autoTimer: null,
 
+        // Sekme tanimlari — her birinin id ve goruntu ismi var
         tabs: [
             { id: 'modes',    label: 'Mod Haritasi' },
             { id: 'angles',   label: 'Aci Haritasi' },
@@ -45,21 +68,21 @@ function trackerCluster() {
             { id: 'settings', label: 'Ayarlar' },
         ],
 
-        // Bulk mode control
+        // Toplu mod yazma durumu — hangi PM'ler secili, hangi mod, islem durumu
         bulk: {
             selectedPMs: {},
             selectedMode: null,
             busy: false,
             msg: '',
         },
-        // Bulk angle control
+        // Toplu aci yazma durumu
         bulkAngle: {
             selectedPMs: {},
             angle: '',
             busy: false,
             msg: '',
         },
-        // Bulk time control
+        // Toplu zaman yazma durumu
         bulkTime: {
             selectedPMs: {},
             manualDate: '',
@@ -67,6 +90,7 @@ function trackerCluster() {
             busy: false,
             msg: '',
         },
+        // Toplu mod secenekleri — kullanicinin secebilecegi mod butonlari
         bulkModes: [
             { value: 0x01, label: 'AST', color: '#4CAF50' },
             { value: 0x06, label: 'WND', color: '#FF9800' },
@@ -74,7 +98,7 @@ function trackerCluster() {
             { value: 0x08, label: 'MNT', color: '#FFD600' },
         ],
 
-        // Settings
+        // Ayarlar sekmesi durumu
         settings: {
             poll_interval: 60,
             loading: false,
@@ -82,12 +106,16 @@ function trackerCluster() {
             msg: '',
         },
 
+        // init: Alpine.js bileseni baslatildiginda cagirilir.
+        // Cluster verisini ve ayarlari yukler, otomatik yenilemeyi baslatir.
         init() {
             this.loadCluster();
             this.loadSettings();
             this.startAutoRefresh();
         },
 
+        // loadCluster: Backend'den /api/cluster ile tum PM verilerini ceker.
+        // Basarili olursa cluster dizisini gunceller ve son poll zamanini kaydeder.
         async loadCluster() {
             this.loading = true;
             try {
@@ -103,12 +131,16 @@ function trackerCluster() {
             this.loading = false;
         },
 
+        // manualPoll: Kullanici "Yenile" butonuna bastiginda cagirilir.
+        // Backend'e poll istegi gonderir, 2sn bekleyip veriyi tekrar ceker.
+        // Bekleme sebebi: backend'in tum PM'leri sorgulamasi zaman alir.
         async manualPoll() {
             await fetch('/api/poll', { method: 'POST' });
-            // Wait a bit then reload
             setTimeout(() => this.loadCluster(), 2000);
         },
 
+        // startAutoRefresh: Periyodik otomatik yenileme timer'ini baslatir.
+        // poll_interval ayarina gore saniye cinsinden tekrar eder.
         startAutoRefresh() {
             if (this._autoTimer) clearInterval(this._autoTimer);
             if (this.autoRefresh) {
@@ -119,6 +151,8 @@ function trackerCluster() {
             }
         },
 
+        // toggleAutoRefresh: Otomatik yenileme toggle edildiginde cagirilir.
+        // Aciksa timer baslatir, kapaliysa timer'i durdurur.
         toggleAutoRefresh() {
             if (this.autoRefresh) {
                 this.startAutoRefresh();
@@ -128,15 +162,23 @@ function trackerCluster() {
             }
         },
 
+        // getPMRows: PM'leri satir bazli dizi olarak dondurur (grid gosterimi icin)
         getPMRows() {
             return [this.cluster];
         },
 
+        // reverseRow: Omega satir numarasini ters cevirir.
+        // Fiziksel yerlesimde Omega siralama yukari-asagi oldugu icin gerekli.
         reverseRow(row) {
             return 17 - row;
         },
 
-        // Get pixel color for a specific device
+        // -----------------------------------------------------------------------
+        // Pixel Renk ve Veri Erisim Fonksiyonlari
+        // -----------------------------------------------------------------------
+
+        // getPixelColor: Belirli bir PM > Omega > Cihaz icin mod rengini dondurur.
+        // PM offline, Omega offline veya veri yoksa uygun durum rengini verir.
         getPixelColor(pm, omegaIdx, devIdx) {
             if (!pm || !pm.online) return OFFLINE_COLOR;
             if (!pm.omegas || omegaIdx >= pm.omegas.length) return NODATA_COLOR;
@@ -146,7 +188,8 @@ function trackerCluster() {
             return modePixelColor(omega.devices[devIdx]);
         },
 
-        // Get angle text
+        // getAngleText: Belirli bir cihazin aci degerini metin olarak dondurur.
+        // Hata veya veri yoksa bos string doner.
         getAngleText(pm, omegaIdx, devIdx) {
             if (!pm || !pm.online) return '';
             if (!pm.omegas || omegaIdx >= pm.omegas.length) return '';
@@ -157,6 +200,7 @@ function trackerCluster() {
             return dev.angle + '';
         },
 
+        // getTimeText: Belirli bir cihazin saat bilgisini metin olarak dondurur.
         getTimeText(pm, omegaIdx, devIdx) {
             if (!pm || !pm.online) return '';
             if (!pm.omegas || omegaIdx >= pm.omegas.length) return '';
@@ -167,15 +211,25 @@ function trackerCluster() {
             return dev.time;
         },
 
+        // getModeName: Mod numarasini okunabilir isme cevirir.
+        // Tanimli degilse hex gosterim kullanir (orn: 0x0A).
         getModeName(val) {
             if (val === null || val === undefined) return '-';
             return MODE_NAMES[val] || ('0x' + val.toString(16).toUpperCase());
         },
 
-        // Total stats
+        // -----------------------------------------------------------------------
+        // Istatistik Hesaplama
+        // -----------------------------------------------------------------------
+
+        // getStats: Tum cluster icin ozet istatistikleri hesaplar.
+        // Toplam cihaz, online, offline, hatali sayilari ve mod bazli dagilimi dondurur.
         getStats() {
             var total = 0, online = 0, error = 0, offline = 0, pmsOnline = 0;
+            // Mod bazli sayac — her mod icin kac cihaz o modda
             var mc = { 0: 0, 1: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
+
+            // Tum PM > Omega > Cihaz hiyerarsisini tara
             for (var i = 0; i < this.cluster.length; i++) {
                 var w = this.cluster[i];
                 if (w.online) pmsOnline++;
@@ -195,6 +249,8 @@ function trackerCluster() {
                     }
                 }
             }
+
+            // Legend icin mod dagilimi dizisi — UI'da renk kutucuklariyla gosterilir
             var modeCounts = [
                 { label: 'FT', count: mc[0], color: '#9E9E9E' },
                 { label: 'AST', count: mc[1], color: '#4CAF50' },
@@ -209,7 +265,11 @@ function trackerCluster() {
             return { total: total, online: online, error: error, offline: offline, pmsOnline: pmsOnline, pmsTotal: this.cluster.length, modeCounts: modeCounts };
         },
 
-        // Settings
+        // -----------------------------------------------------------------------
+        // Ayarlar Yonetimi
+        // -----------------------------------------------------------------------
+
+        // loadSettings: Backend'den mevcut ayarlari ceker.
         async loadSettings() {
             this.settings.loading = true;
             try {
@@ -222,6 +282,8 @@ function trackerCluster() {
             this.settings.loading = false;
         },
 
+        // saveSettings: Degistirilen ayarlari backend'e kaydeder.
+        // Basarili olursa otomatik yenileme timer'ini yeni aralikla yeniden baslatir.
         async saveSettings() {
             this.settings.saving = true;
             this.settings.msg = '';
@@ -234,6 +296,7 @@ function trackerCluster() {
                 var data = await resp.json();
                 if (data && data.ok) {
                     this.settings.msg = 'Kaydedildi';
+                    // Yeni poll araligi ile timer'i yeniden baslat
                     this.startAutoRefresh();
                 } else {
                     this.settings.msg = 'Hata';
@@ -244,11 +307,18 @@ function trackerCluster() {
             this.settings.saving = false;
         },
 
+        // -----------------------------------------------------------------------
+        // Toplu Mod Yazma (Bulk Mode)
+        // Secili PM'lerdeki tum Omega ve cihazlara ayni modu yazar.
+        // -----------------------------------------------------------------------
+
+        // bulkTogglePM: Belirli bir PM'in secim durumunu degistirir
         bulkTogglePM(idx) {
             this.bulk.selectedPMs = Object.assign({}, this.bulk.selectedPMs,
                 { [idx]: !this.bulk.selectedPMs[idx] });
         },
 
+        // bulkSelectAll: Tumu sec / tumu kaldir toggle islemi
         bulkSelectAll() {
             var all = {};
             var allSelected = true;
@@ -256,6 +326,7 @@ function trackerCluster() {
                 if (!this.bulk.selectedPMs[i]) allSelected = false;
                 all[i] = true;
             }
+            // Hepsi zaten seciliyse kaldir, degilse hepsini sec
             if (allSelected) {
                 this.bulk.selectedPMs = {};
             } else {
@@ -263,6 +334,7 @@ function trackerCluster() {
             }
         },
 
+        // bulkAllSelected: Tum PM'ler secili mi kontrolu
         bulkAllSelected() {
             if (this.cluster.length === 0) return false;
             for (var i = 0; i < this.cluster.length; i++) {
@@ -271,12 +343,17 @@ function trackerCluster() {
             return true;
         },
 
+        // bulkSelectMode: Mod butonuna tiklandiginda secim yapar.
+        // Ayni moda tekrar tiklanirsa secimi kaldirir (toggle).
         bulkSelectMode(val) {
             this.bulk.selectedMode = (this.bulk.selectedMode === val) ? null : val;
         },
 
+        // bulkApplyMode: Secili PM'lerin tum Omega/cihazlarina secilen modu yazar.
+        // Her PM'e paralel istek gonderir, sonuclari toplar ve kullaniciya bildirir.
         async bulkApplyMode() {
             if (this.bulk.selectedMode === null) return;
+            // Sadece secili ve online olan PM'leri filtrele
             var selected = [];
             for (var i = 0; i < this.cluster.length; i++) {
                 if (this.bulk.selectedPMs[i] && this.cluster[i].online) selected.push(this.cluster[i]);
@@ -287,9 +364,11 @@ function trackerCluster() {
             this.bulk.msg = 'Yaziliyor... (' + selected.length + ' santral)';
             var mode = this.bulk.selectedMode;
 
+            // Her PM icin kendi bulk/mode endpoint'ine paralel istek gonder
             var promises = selected.map(function(pm) {
                 if (!pm.omegas) return Promise.resolve(null);
                 var ids = pm.omegas.map(function(o) { return o.id; });
+                // 0-15 arasi tum cihazlara yazma yapilir
                 var devices = [];
                 for (var d = 0; d < 16; d++) devices.push(d);
                 return fetch('http://' + pm.ip + ':8090/api/bulk/mode', {
@@ -299,7 +378,9 @@ function trackerCluster() {
                 }).then(function(r) { return r.json(); }).catch(function() { return null; });
             });
 
+            // Tum paralel isteklerin tamamlanmasini bekle
             var results = await Promise.all(promises);
+            // Basarili/toplam yazma sayisini hesapla
             var totalOk = 0, totalAll = 0;
             for (var i = 0; i < results.length; i++) {
                 if (results[i] && results[i].results) {
@@ -312,14 +393,22 @@ function trackerCluster() {
 
             this.bulk.busy = false;
             this.bulk.msg = totalOk + '/' + totalAll + ' yazildi';
+            // 2sn sonra veriyi yenileyerek degisiklikleri goruntule
             setTimeout(() => this.loadCluster(), 2000);
         },
 
+        // -----------------------------------------------------------------------
+        // Toplu Aci Yazma (Bulk Angle)
+        // Secili PM'lerdeki tum cihazlara ayni aciyi yazar.
+        // -----------------------------------------------------------------------
+
+        // bulkAngleTogglePM: Aci sekmesinde PM secim toggle
         bulkAngleTogglePM(idx) {
             this.bulkAngle.selectedPMs = Object.assign({}, this.bulkAngle.selectedPMs,
                 { [idx]: !this.bulkAngle.selectedPMs[idx] });
         },
 
+        // bulkAngleSelectAll: Aci sekmesinde tumu sec/kaldir
         bulkAngleSelectAll() {
             var all = {};
             var allSelected = true;
@@ -330,6 +419,7 @@ function trackerCluster() {
             this.bulkAngle.selectedPMs = allSelected ? {} : all;
         },
 
+        // bulkAngleAllSelected: Tum PM'ler secili mi kontrolu
         bulkAngleAllSelected() {
             if (this.cluster.length === 0) return false;
             for (var i = 0; i < this.cluster.length; i++) {
@@ -338,8 +428,11 @@ function trackerCluster() {
             return true;
         },
 
+        // bulkApplyAngle: Secili PM'lere girilen aciyi toplu yazar.
+        // Aci -60 ile +60 derece arasinda olmali (tracker fiziksel siniri).
         async bulkApplyAngle() {
             var angle = parseFloat(this.bulkAngle.angle);
+            // Gecersiz veya sinir disindaki acilari reddet
             if (isNaN(angle) || angle < -60 || angle > 60) return;
             var selected = [];
             for (var i = 0; i < this.cluster.length; i++) {
@@ -350,6 +443,7 @@ function trackerCluster() {
             this.bulkAngle.busy = true;
             this.bulkAngle.msg = 'Yaziliyor... (' + selected.length + ' santral)';
 
+            // Her PM'e paralel aci yazma istegi gonder
             var promises = selected.map(function(pm) {
                 if (!pm.omegas) return Promise.resolve(null);
                 var ids = pm.omegas.map(function(o) { return o.id; });
@@ -378,11 +472,19 @@ function trackerCluster() {
             setTimeout(() => this.loadCluster(), 2000);
         },
 
+        // -----------------------------------------------------------------------
+        // Toplu Zaman Yazma (Bulk Time)
+        // Secili PM'lerdeki tum Omega'lara saat/tarih yazar.
+        // Tarayici saati veya manuel giris kullanilabilir.
+        // -----------------------------------------------------------------------
+
+        // bulkTimeTogglePM: Zaman sekmesinde PM secim toggle
         bulkTimeTogglePM(idx) {
             this.bulkTime.selectedPMs = Object.assign({}, this.bulkTime.selectedPMs,
                 { [idx]: !this.bulkTime.selectedPMs[idx] });
         },
 
+        // bulkTimeSelectAll: Zaman sekmesinde tumu sec/kaldir
         bulkTimeSelectAll() {
             var all = {};
             var allSelected = true;
@@ -393,6 +495,7 @@ function trackerCluster() {
             this.bulkTime.selectedPMs = allSelected ? {} : all;
         },
 
+        // bulkTimeAllSelected: Tum PM'ler secili mi kontrolu
         bulkTimeAllSelected() {
             if (this.cluster.length === 0) return false;
             for (var i = 0; i < this.cluster.length; i++) {
@@ -401,12 +504,16 @@ function trackerCluster() {
             return true;
         },
 
+        // bulkApplyTimeBrowser: Tarayicinin anlik saatini tum secili PM'lere yazar.
+        // Sahada bilgisayar saati referans alinarak tracker'lar senkronize edilir.
         async bulkApplyTimeBrowser() {
             var now = new Date();
             await this._bulkApplyTime(now.getFullYear(), now.getMonth() + 1, now.getDate(),
                 now.getHours(), now.getMinutes(), now.getSeconds());
         },
 
+        // bulkApplyTimeManual: Kullanicinin elle girdigi tarih/saat degerini yazar.
+        // Farkli saat dilimi veya ozel zaman ayari gerektigi durumlarda kullanilir.
         async bulkApplyTimeManual() {
             if (!this.bulkTime.manualDate || !this.bulkTime.manualTime) return;
             var dp = this.bulkTime.manualDate.split('-');
@@ -415,6 +522,9 @@ function trackerCluster() {
                 parseInt(tp[0]), parseInt(tp[1]), parseInt(tp[2] || 0));
         },
 
+        // _bulkApplyTime: Ortak zaman yazma fonksiyonu.
+        // Yil, ay, gun, saat, dakika, saniye parametrelerini alir ve
+        // secili tum PM'lerin Omega'larina paralel olarak yazar.
         async _bulkApplyTime(year, month, day, hour, minute, second) {
             var selected = [];
             for (var i = 0; i < this.cluster.length; i++) {
@@ -425,6 +535,7 @@ function trackerCluster() {
             this.bulkTime.busy = true;
             this.bulkTime.msg = 'Yaziliyor... (' + selected.length + ' santral)';
 
+            // Her PM'e paralel zaman yazma istegi
             var promises = selected.map(function(pm) {
                 if (!pm.omegas) return Promise.resolve(null);
                 var ids = pm.omegas.map(function(o) { return o.id; });
@@ -451,6 +562,8 @@ function trackerCluster() {
             setTimeout(() => this.loadCluster(), 2000);
         },
 
+        // bulkTimeBrowserNow: Tarayicinin anlik saatini formatli metin olarak dondurur.
+        // "Tarayici Saati" butonunun yaninda gosterilir (ornek: 2026-04-07 14:30:25).
         bulkTimeBrowserNow() {
             var now = new Date();
             return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' +
@@ -460,6 +573,13 @@ function trackerCluster() {
                 String(now.getSeconds()).padStart(2, '0');
         },
 
+        // -----------------------------------------------------------------------
+        // Background Reader Kontrolu
+        // -----------------------------------------------------------------------
+
+        // toggleBR: Omega'nin arka plan okuyucusunu ac/kapat.
+        // Bu ayar, Omega'nin belirli araliklarla otomatik Modbus okuma yapmasini saglar.
+        // Backend'e proxy istegi gonderir, backend de PM'e iletir.
         async toggleBR(pmIp, omegaId, enabled, interval) {
             try {
                 await fetch('/api/br-settings', {
