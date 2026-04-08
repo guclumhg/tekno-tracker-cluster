@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tekno Tracker Cluster — Kullanma Kilavuzu</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Segoe UI", Arial, sans-serif; font-size: 14px; background: #1a1a1a; color: #ccc; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        h1 { font-size: 22px; color: #4FC3F7; margin-bottom: 4px; }
+        .subtitle { font-size: 12px; color: #666; margin-bottom: 20px; }
+        h2 { font-size: 17px; color: #4FC3F7; margin-top: 28px; margin-bottom: 10px; border-bottom: 2px solid #4FC3F7; padding-bottom: 4px; }
+        h3 { font-size: 14px; color: #aaa; margin-top: 16px; margin-bottom: 6px; }
+        p { margin-bottom: 10px; }
+        ul, ol { margin-left: 20px; margin-bottom: 10px; }
+        li { margin-bottom: 4px; }
+        code { background: #333; padding: 1px 5px; border-radius: 3px; font-family: "Courier New", monospace; font-size: 13px; color: #4FC3F7; }
+        .note { background: #1e3a5f; border-left: 4px solid #4FC3F7; padding: 8px 12px; margin: 10px 0; font-size: 13px; }
+        .warn { background: #3e2723; border-left: 4px solid #FF9800; padding: 8px 12px; margin: 10px 0; font-size: 13px; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 13px; }
+        th, td { border: 1px solid #444; padding: 6px 10px; text-align: left; }
+        th { background: #263238; color: #4FC3F7; }
+        .back { display: inline-block; margin-bottom: 16px; color: #4FC3F7; text-decoration: none; font-size: 13px; }
+        .back:hover { text-decoration: underline; }
+        .color-box { display: inline-block; width: 14px; height: 14px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+<a href="/" class="back">← Ana Sayfaya Don</a>
+
+<h1>Tekno Tracker Cluster — Kullanma Kilavuzu</h1>
+<div class="subtitle">Yazar: Muhammed Hasan Guclu | Surumu: 1.0</div>
+
+<h2>1. Genel Bakis</h2>
+<p>Tekno Tracker Cluster, sahadaki 15 PlantManager'dan veri cekerek tum solar tracker'lari (3840 adet) tek bir ekrandan izlemenizi ve kontrol etmenizi saglar.</p>
+<p>Erisim: <code>http://localhost:8095</code> adresini tarayicinizda acin.</p>
+<p>Uygulama arka planda calisir (konsol penceresi acilmaz). Kapatmak icin Gorev Yoneticisi'nden <code>tekno-tracker-cluster.exe</code> islemini sonlandirin.</p>
+
+<h2>2. Ust Bilgi Cubugu</h2>
+<p>Her sayfanin ustunde su bilgiler bulunur:</p>
+<ul>
+    <li><strong>PlantManager: 15/15</strong> — Kac PlantManager'a erisildigini gosterir.</li>
+    <li><strong>Son Guncelleme:</strong> Verinin en son ne zaman cekildigini gosterir.</li>
+</ul>
+
+<h2>3. Mod Haritasi</h2>
+<p>Tum sahanin tracker modlarini tek bakista gormenizi saglar. Her PlantManager icin 16x16 piksel blok (DTK x Cihaz) gosterilir.</p>
+
+<h3>Blok Yapisi</h3>
+<ul>
+    <li>Her blok bir PlantManager'i temsil eder (15 blok).</li>
+    <li>Blogun uzerindeki isim tiklaninca ilgili PlantManager web arayuzu acilir.</li>
+    <li>Her piksel bir tracker cihazini temsil eder. Rengi o cihazdaki aktif modu gosterir.</li>
+    <li>Pikselin uzerine gelince tooltip'te DTK ve cihaz numarasi gosterilir.</li>
+    <li>DTK 1 ustte, DTK 16 altta siralıdır. Cihaz 1 solda, Cihaz 16 sagda.</li>
+</ul>
+
+<h3>Renk Aciklamalari</h3>
+<p>Sayfa altinda her mod icin renkli sayac gosterilir:</p>
+<table>
+    <tr><th>Renk</th><th>Kisaltma</th><th>Mod</th></tr>
+    <tr><td><span class="color-box" style="background:#9E9E9E"></span></td><td>FT</td><td>First Test</td></tr>
+    <tr><td><span class="color-box" style="background:#4CAF50"></span></td><td>AST</td><td>Astronom (normal calisma)</td></tr>
+    <tr><td><span class="color-box" style="background:#673AB7"></span></td><td>NGT</td><td>Night (gece modu)</td></tr>
+    <tr><td><span class="color-box" style="background:#FF9800"></span></td><td>WND</td><td>Wind (ruzgar koruma)</td></tr>
+    <tr><td><span class="color-box" style="background:#2196F3"></span></td><td>SNW</td><td>Snow (kar koruma)</td></tr>
+    <tr><td><span class="color-box" style="background:#FFD600"></span></td><td>MNT</td><td>Maintenance (bakim)</td></tr>
+    <tr><td><span class="color-box" style="background:#795548"></span></td><td>ZRO</td><td>Zero Angle</td></tr>
+    <tr><td><span class="color-box" style="background:#D32F2F"></span></td><td>ERR</td><td>Hata (veri alinamadi)</td></tr>
+    <tr><td><span class="color-box" style="background:#555"></span></td><td>OFF</td><td>Erisim yok (PM/DTK offline)</td></tr>
+</table>
+
+<h3>Toplu Mod Guncelleme</h3>
+<ol>
+    <li><strong>Santral secimi:</strong> TUMU'ya basin (tum santraller secilir) veya 1-15 numarali butonlardan istediginizi secin. Mavi = secili.</li>
+    <li><strong>Mod secimi:</strong> AST, WND, SNW veya MNT butonlarindan birini secin. Secili mod rengini alir.</li>
+    <li><strong>GUNCELLE:</strong> Secili santrallerin tum cihazlarina secilen modu yazar. Tum santrallere paralel gonderilir.</li>
+</ol>
+<div class="note">Yazma islemi sonrasi sonuc gosterilir (ornek: "240/240 yazildi"). 2 saniye sonra veriler otomatik yenilenir.</div>
+
+<h3>Yenile ve Otomatik</h3>
+<ul>
+    <li><strong>YENILE:</strong> Verileri sunucudan tekrar ceker.</li>
+    <li><strong>Otomatik:</strong> Isaretlendiginde ayarlardaki poll araligina gore otomatik yenilenir.</li>
+</ul>
+
+<h2>4. Aci Haritasi</h2>
+<p>Tum tracker'larin guncel aci degerlerini gosterir. Ayni blok duzeninde, her hucrede aci degeri (derece) yazılıdır.</p>
+
+<h3>Toplu Aci Guncelleme</h3>
+<ol>
+    <li><strong>Santral secimi:</strong> Mod haritasiyla ayni mantik.</li>
+    <li><strong>Aci girisi:</strong> -60 ile +60 arasi derece degeri girin.</li>
+    <li><strong>GUNCELLE:</strong> Secili santrallerin tum cihazlarina aciyi yazar.</li>
+</ol>
+<div class="warn">Aci gondermek icin cihazlarin Maintenance modunda olmasi gerekir. Once Mod Haritasindan MNT moduna alin.</div>
+
+<h2>5. Zaman Haritasi</h2>
+<p>Tum tracker'larin dahili saatini gosterir. Her hucrede HH:MM formati gorulur.</p>
+
+<h3>Saat Guncelleme</h3>
+<ol>
+    <li><strong>Santral secimi:</strong> Ayni mantik.</li>
+    <li><strong>BROWSER SAATI YAZ:</strong> Bilgisayarinizin saatini secili santrallere yazar.</li>
+    <li><strong>Manuel saat:</strong> Tarih ve saat girdikten sonra MANUAL YAZ'a basin.</li>
+</ol>
+
+<h2>6. Ayarlar</h2>
+<ul>
+    <li><strong>Poll Araligi (sn):</strong> Sunucunun PlantManager'lardan ne siklikla veri cekecegini belirler. Varsayilan: 60 saniye.</li>
+    <li>Degisikligi KAYDET ile uygulayın.</li>
+</ul>
+
+<h2>7. Genel Kullanim Ipuclari</h2>
+<ul>
+    <li>Sayfa zoom'unu degistirerek bloklarin boyutunu ayarlayabilirsiniz (Ctrl + veya Ctrl -).</li>
+    <li>Blok ismine tiklaninca ilgili PlantManager acilir — detayli kontrol orada yapilir.</li>
+    <li>Veriler otomatik guncellenir. YENILE butonuyla aninda guncelleyebilirsiniz.</li>
+    <li>Yazma islemleri paralel gonderilir, hepsi ayni anda baslar.</li>
+</ul>
+
+<h2>8. Sorun Giderme</h2>
+<table>
+    <tr><th>Sorun</th><th>Olasi Neden</th><th>Cozum</th></tr>
+    <tr><td>Tum bloklar koyu gri (OFF)</td><td>PlantManager'lara erisim yok</td><td>Ag baglantisinizi kontrol edin (192.168.5.x aginda misiniz?)</td></tr>
+    <tr><td>Bazi bloklar OFF</td><td>Ilgili PlantManager kapali veya erisilemez</td><td>O WAGO'nun acik oldugunu kontrol edin</td></tr>
+    <tr><td>ERR (kirmizi) pikseller</td><td>DTK online ama cihazdan veri alinamadi</td><td>Fiziksel Modbus baglantisini kontrol edin</td></tr>
+    <tr><td>Sayfa acilmiyor</td><td>tekno-tracker-cluster.exe calismiyorez</td><td>Exe'yi cift tiklayarak baslatin</td></tr>
+    <tr><td>Mod yazma basarisiz</td><td>PlantManager veya DTK'da sorun</td><td>Ilgili PlantManager'a gidip kontrol edin</td></tr>
+    <tr><td>Aci yazilamiyor</td><td>Cihazlar Maintenance modunda degil</td><td>Once Mod Haritasindan MNT moduna alin</td></tr>
+</table>
+
+</div>
+</body>
+</html>
