@@ -55,6 +55,14 @@ function trackerCluster() {
             busy: false,
             msg: '',
         },
+        // Bulk time control
+        bulkTime: {
+            selectedPMs: {},
+            manualDate: '',
+            manualTime: '',
+            busy: false,
+            msg: '',
+        },
         bulkModes: [
             { value: 0x01, label: 'AST', color: '#4CAF50' },
             { value: 0x06, label: 'WND', color: '#FF9800' },
@@ -364,6 +372,88 @@ function trackerCluster() {
             this.bulkAngle.busy = false;
             this.bulkAngle.msg = totalOk + '/' + totalAll + ' yazildi';
             setTimeout(() => this.loadCluster(), 2000);
+        },
+
+        bulkTimeTogglePM(idx) {
+            this.bulkTime.selectedPMs = Object.assign({}, this.bulkTime.selectedPMs,
+                { [idx]: !this.bulkTime.selectedPMs[idx] });
+        },
+
+        bulkTimeSelectAll() {
+            var all = {};
+            var allSelected = true;
+            for (var i = 0; i < this.cluster.length; i++) {
+                if (!this.bulkTime.selectedPMs[i]) allSelected = false;
+                all[i] = true;
+            }
+            this.bulkTime.selectedPMs = allSelected ? {} : all;
+        },
+
+        bulkTimeAllSelected() {
+            if (this.cluster.length === 0) return false;
+            for (var i = 0; i < this.cluster.length; i++) {
+                if (!this.bulkTime.selectedPMs[i]) return false;
+            }
+            return true;
+        },
+
+        async bulkApplyTimeBrowser() {
+            var now = new Date();
+            await this._bulkApplyTime(now.getFullYear(), now.getMonth() + 1, now.getDate(),
+                now.getHours(), now.getMinutes(), now.getSeconds());
+        },
+
+        async bulkApplyTimeManual() {
+            if (!this.bulkTime.manualDate || !this.bulkTime.manualTime) return;
+            var dp = this.bulkTime.manualDate.split('-');
+            var tp = this.bulkTime.manualTime.split(':');
+            await this._bulkApplyTime(parseInt(dp[0]), parseInt(dp[1]), parseInt(dp[2]),
+                parseInt(tp[0]), parseInt(tp[1]), parseInt(tp[2] || 0));
+        },
+
+        async _bulkApplyTime(year, month, day, hour, minute, second) {
+            var selected = [];
+            for (var i = 0; i < this.cluster.length; i++) {
+                if (this.bulkTime.selectedPMs[i] && this.cluster[i].online) selected.push(this.cluster[i]);
+            }
+            if (selected.length === 0) return;
+
+            this.bulkTime.busy = true;
+            this.bulkTime.msg = 'Yaziliyor... (' + selected.length + ' santral)';
+
+            var promises = selected.map(function(pm) {
+                if (!pm.omegas) return Promise.resolve(null);
+                var ids = pm.omegas.map(function(o) { return o.id; });
+                return fetch('http://' + pm.ip + ':8090/api/bulk/time', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ omega_ids: ids, year: year, month: month, day: day, hour: hour, minute: minute, second: second }),
+                }).then(function(r) { return r.json(); }).catch(function() { return null; });
+            });
+
+            var results = await Promise.all(promises);
+            var totalOk = 0, totalAll = 0;
+            for (var i = 0; i < results.length; i++) {
+                if (results[i] && results[i].results) {
+                    for (var j = 0; j < results[i].results.length; j++) {
+                        totalAll++;
+                        if (results[i].results[j].success) totalOk++;
+                    }
+                }
+            }
+
+            this.bulkTime.busy = false;
+            this.bulkTime.msg = totalOk + '/' + totalAll + ' yazildi';
+            setTimeout(() => this.loadCluster(), 2000);
+        },
+
+        bulkTimeBrowserNow() {
+            var now = new Date();
+            return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                String(now.getDate()).padStart(2, '0') + ' ' +
+                String(now.getHours()).padStart(2, '0') + ':' +
+                String(now.getMinutes()).padStart(2, '0') + ':' +
+                String(now.getSeconds()).padStart(2, '0');
         },
 
         async toggleBR(pmIp, omegaId, enabled, interval) {

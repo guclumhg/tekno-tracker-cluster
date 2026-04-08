@@ -182,6 +182,38 @@
                 <span class="refresh-info" x-show="loading">Yukleniyor...</span>
             </div>
 
+            <!-- Bulk time control -->
+            <div class="form-box" style="margin-bottom:8px">
+                <div class="form-row" style="margin-bottom:4px">
+                    <span style="font-size:10px;color:#888;min-width:50px">Santral:</span>
+                    <button class="btn btn-sm" :class="bulkTimeAllSelected() ? 'btn-blue' : 'btn-mode-off'"
+                            @click="bulkTimeSelectAll()" style="font-size:9px;padding:2px 6px">TUMU</button>
+                    <template x-for="(pm, wi) in cluster" :key="'ts'+wi">
+                        <button class="btn btn-sm"
+                                :class="bulkTime.selectedPMs[wi] ? 'btn-blue' : 'btn-mode-off'"
+                                @click="bulkTimeTogglePM(wi)"
+                                style="font-size:9px;padding:2px 5px"
+                                x-text="wi+1"></button>
+                    </template>
+                </div>
+                <div class="form-row">
+                    <button class="btn btn-green btn-sm"
+                            :disabled="bulkTime.busy"
+                            @click="bulkApplyTimeBrowser()"
+                            style="font-size:10px;padding:3px 10px">BROWSER SAATI YAZ</button>
+                    <span style="font-size:10px;color:#666" x-text="'Browser: ' + bulkTimeBrowserNow()"></span>
+                    <span style="color:#555">|</span>
+                    <input type="date" x-model="bulkTime.manualDate" style="width:110px;font-size:10px">
+                    <input type="time" x-model="bulkTime.manualTime" step="1" style="width:75px;font-size:10px">
+                    <button class="btn btn-green btn-sm"
+                            :disabled="!bulkTime.manualDate || !bulkTime.manualTime || bulkTime.busy"
+                            @click="bulkApplyTimeManual()"
+                            style="font-size:10px;padding:3px 10px">MANUAL YAZ</button>
+                    <span class="refresh-info" x-show="bulkTime.msg" x-text="bulkTime.msg"
+                          :style="'color:' + (bulkTime.busy ? '#FF9800' : '#4CAF50') + ';font-weight:bold'"></span>
+                </div>
+            </div>
+
             <template x-for="(pmRow, ri) in getPMRows()" :key="'tr'+ri">
                 <div class="block-row">
                     <template x-for="(pm, wi) in pmRow" :key="'tb'+ri+'_'+wi">
