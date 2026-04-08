@@ -1,3 +1,12 @@
+// =============================================================================
+// Tekno Tracker Cluster — Merkezi Izleme ve Kontrol Sistemi
+// 15 PlantManager'dan paralel veri toplayarak 3840 solar tracker'i
+// tek ekrandan izleme ve toplu mod/aci/zaman yazma.
+// Windows'ta calisir, konsol penceresi acmaz.
+//
+// Designed and Written by Muhammed Hasan GUCLU - 2026
+// =============================================================================
+
 package main
 
 import (

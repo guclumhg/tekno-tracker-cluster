@@ -1,5 +1,9 @@
 /**
  * Tekno Tracker Cluster — Alpine.js Application
+ * 4 sekmeli tek sayfa uygulama: Mod Haritasi, Aci Haritasi,
+ * Zaman Haritasi, Ayarlar. Koyu temali, pixel grid gorunum.
+ *
+ * Designed and Written by Muhammed Hasan GUCLU - 2026
  */
 
 var MODE_COLORS = {
