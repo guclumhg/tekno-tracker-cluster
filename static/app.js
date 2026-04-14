@@ -13,7 +13,7 @@
 // MODE_COLORS: Her tracker modunun pixel grid'deki rengi.
 // Mod numaralari Modbus holding register'dan gelir.
 var MODE_COLORS = {
-    0: '#9E9E9E',  // First Test
+    0: '#E91E63',  // First Test (pembe)
     1: '#4CAF50',  // Astronom
     5: '#673AB7',  // Night
     6: '#FF9800',  // Wind
@@ -38,7 +38,7 @@ var NODATA_COLOR = '#eee';      // Veri gelmemis cihazlar icin acik arka plan
 function modePixelColor(dev) {
     if (!dev || dev.error) return ERR_COLOR;
     if (dev.mode === null || dev.mode === undefined) return NODATA_COLOR;
-    return MODE_COLORS[dev.mode] || '#555';
+    return MODE_COLORS[dev.mode] || '#aaa';
 }
 
 // ---------------------------------------------------------------------------
@@ -429,7 +429,7 @@ function trackerCluster() {
 
             // Legend icin mod dagilimi dizisi — UI'da renk kutucuklariyla gosterilir
             var modeCounts = [
-                { label: 'FT', count: mc[0], color: '#9E9E9E' },
+                { label: 'FT', count: mc[0], color: '#E91E63' },
                 { label: 'AST', count: mc[1], color: '#4CAF50' },
                 { label: 'NGT', count: mc[5], color: '#673AB7' },
                 { label: 'WND', count: mc[6], color: '#FF9800' },
@@ -437,7 +437,7 @@ function trackerCluster() {
                 { label: 'MNT', count: mc[8], color: '#FFD600' },
                 { label: 'ZRO', count: mc[9], color: '#795548' },
                 { label: 'ERR', count: error, color: '#D32F2F' },
-                { label: 'OFF', count: offline, color: '#555' },
+                { label: 'OFF', count: offline, color: '#ccc' },
             ];
             return { total: total, online: online, error: error, offline: offline, pmsOnline: pmsOnline, pmsTotal: this.cluster.length, modeCounts: modeCounts };
         },
