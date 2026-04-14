@@ -261,6 +261,59 @@ function trackerCluster() {
             return 'rgb(' + r + ',' + g + ',' + b + ')';
         },
 
+        // getTimeAvg: Tum cluster'daki gecerli saat degerlerinin ortalamasini dakika cinsinden hesaplar.
+        getTimeAvg() {
+            var sum = 0, count = 0;
+            for (var p = 0; p < this.cluster.length; p++) {
+                var pm = this.cluster[p];
+                if (!pm || !pm.online || !pm.omegas) continue;
+                for (var o = 0; o < pm.omegas.length; o++) {
+                    var omega = pm.omegas[o];
+                    if (!omega || !omega.online || !omega.devices) continue;
+                    for (var d = 0; d < omega.devices.length; d++) {
+                        var dev = omega.devices[d];
+                        if (dev && !dev.error && dev.time) {
+                            var parts = dev.time.split(':');
+                            if (parts.length >= 2) {
+                                sum += parseInt(parts[0]) * 60 + parseInt(parts[1]);
+                                count++;
+                            }
+                        }
+                    }
+                }
+            }
+            return count > 0 ? sum / count : 0;
+        },
+
+        // getTimeAvgStr: Ortalama saati HH:MM formatinda dondurur.
+        getTimeAvgStr() {
+            var avg = this.getTimeAvg();
+            var h = Math.floor(avg / 60);
+            var m = Math.round(avg % 60);
+            return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+        },
+
+        // getTimeCellColor: Saat degerinin ortalamaya uzakligina gore renk dondurur.
+        // Yakin = yesil, 60dk+ uzak = kirmizi.
+        getTimeCellColor(pm, omegaIdx, devIdx) {
+            if (!pm || !pm.online || !pm.omegas || omegaIdx >= pm.omegas.length) return '';
+            var omega = pm.omegas[omegaIdx];
+            if (!omega || !omega.online || !omega.devices || devIdx >= omega.devices.length) return '';
+            var dev = omega.devices[devIdx];
+            if (!dev || dev.error || !dev.time) return '';
+            var parts = dev.time.split(':');
+            if (parts.length < 2) return '';
+            var mins = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            var avg = this.getTimeAvg();
+            var diff = Math.abs(mins - avg);
+            var maxDiff = 60; // 1 saat
+            var ratio = Math.min(diff / maxDiff, 1);
+            var r = Math.round(0 + ratio * 220);
+            var g = Math.round(180 - ratio * 140);
+            var b = Math.round(0 + ratio * 40);
+            return 'rgb(' + r + ',' + g + ',' + b + ')';
+        },
+
         // getPixelColor: Belirli bir PM > Omega > Cihaz icin mod rengini dondurur.
         // PM offline, Omega offline veya veri yoksa uygun durum rengini verir.
         getPixelColor(pm, omegaIdx, devIdx) {

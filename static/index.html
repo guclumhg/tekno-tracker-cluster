@@ -212,6 +212,7 @@
                             :disabled="!bulkTime.manualDate || !bulkTime.manualTime || bulkTime.busy"
                             @click="bulkApplyTimeManual()"
                             style="font-size:10px;padding:3px 10px">MANUAL YAZ</button>
+                    <span style="font-size:10px;color:#1565C0;margin-left:10px">Ort: <strong x-text="getTimeAvgStr()"></strong></span>
                     <span class="refresh-info" x-show="bulkTime.msg" x-text="bulkTime.msg"
                           :style="'color:' + (bulkTime.busy ? '#FF9800' : '#4CAF50') + ';font-weight:bold'"></span>
                 </div>
@@ -227,6 +228,7 @@
                                     <template x-for="col in pmMaxDevices(pm)" :key="'tec'+ri+'_'+wi+'_'+row+'_'+col">
                                         <div class="time-cell"
                                              :class="getTimeText(pm, reverseRow(row,pm)-1, col-1) ? '' : 'time-empty'"
+                                             :style="getTimeCellColor(pm, reverseRow(row,pm)-1, col-1) ? 'background:' + getTimeCellColor(pm, reverseRow(row,pm)-1, col-1) + ';color:#fff' : ''"
                                              :title="getTooltip(pm, reverseRow(row,pm)-1, col)"
                                              x-text="getTimeText(pm, reverseRow(row,pm)-1, col-1) || ''">
                                         </div>
