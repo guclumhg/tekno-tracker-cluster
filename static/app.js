@@ -252,7 +252,7 @@ function trackerCluster() {
             if (!dev || dev.error || dev.angle === null || dev.angle === undefined) return '';
             var avg = this.getAngleAvg();
             var diff = Math.abs(dev.angle - avg);
-            var maxDiff = 15;
+            var maxDiff = 40;
             var ratio = Math.min(diff / maxDiff, 1);
             // Yesil (0,180,0) -> Kirmizi (220,40,40)
             var r = Math.round(0 + ratio * 220);
