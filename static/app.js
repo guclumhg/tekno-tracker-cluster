@@ -98,6 +98,9 @@ function trackerCluster() {
             { value: 0x08, label: 'MNT', color: '#FFD600' },
         ],
 
+        // Fark boyama modu
+        colorMode: false,
+
         // Ayarlar sekmesi durumu
         settings: {
             poll_interval: 60,
@@ -245,6 +248,7 @@ function trackerCluster() {
         // getAngleCellColor: Aci degerinin ortalamaya uzakligina gore renk dondurur.
         // Yakin = yesil, uzak = kirmizi. maxDiff uzerinde full kirmizi.
         getAngleCellColor(pm, omegaIdx, devIdx) {
+            if (!this.colorMode) return '';
             if (!pm || !pm.online || !pm.omegas || omegaIdx >= pm.omegas.length) return '';
             var omega = pm.omegas[omegaIdx];
             if (!omega || !omega.online || !omega.devices || devIdx >= omega.devices.length) return '';
@@ -296,6 +300,7 @@ function trackerCluster() {
         // getTimeCellColor: Saat degerinin ortalamaya uzakligina gore renk dondurur.
         // Yakin = yesil, 60dk+ uzak = kirmizi.
         getTimeCellColor(pm, omegaIdx, devIdx) {
+            if (!this.colorMode) return '';
             if (!pm || !pm.online || !pm.omegas || omegaIdx >= pm.omegas.length) return '';
             var omega = pm.omegas[omegaIdx];
             if (!omega || !omega.online || !omega.devices || devIdx >= omega.devices.length) return '';
