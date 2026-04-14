@@ -143,7 +143,8 @@
                             :disabled="!bulkAngle.angle || bulkAngle.busy"
                             @click="bulkApplyAngle()"
                             style="font-size:10px;padding:3px 10px">GUNCELLE</button>
-                    <span class="refresh-info" x-show="bulkAngle.msg" x-text="bulkAngle.msg"
+                    <span style="font-size:10px;color:#4FC3F7;margin-left:10px">Ort: <strong x-text="getAngleAvg().toFixed(1) + '°'"></strong></span>
+                <span class="refresh-info" x-show="bulkAngle.msg" x-text="bulkAngle.msg"
                           :style="'color:' + (bulkAngle.busy ? '#FF9800' : '#4CAF50') + ';font-weight:bold'"></span>
                 </div>
             </div>
@@ -158,6 +159,7 @@
                                     <template x-for="col in pmMaxDevices(pm)" :key="'aec'+ri+'_'+wi+'_'+row+'_'+col">
                                         <div class="angle-cell"
                                              :class="getAngleText(pm, reverseRow(row,pm)-1, col-1) ? '' : 'angle-empty'"
+                                             :style="getAngleCellColor(pm, reverseRow(row,pm)-1, col-1) ? 'background:' + getAngleCellColor(pm, reverseRow(row,pm)-1, col-1) + ';color:#fff' : ''"
                                              :title="getTooltip(pm, reverseRow(row,pm)-1, col)"
                                              x-text="getAngleText(pm, reverseRow(row,pm)-1, col-1) || ''">
                                         </div>

@@ -221,6 +221,46 @@ function trackerCluster() {
             return base;
         },
 
+        // getAngleAvg: Tum cluster'daki gecerli aci degerlerinin ortalamasini hesaplar.
+        getAngleAvg() {
+            var sum = 0, count = 0;
+            for (var p = 0; p < this.cluster.length; p++) {
+                var pm = this.cluster[p];
+                if (!pm || !pm.online || !pm.omegas) continue;
+                for (var o = 0; o < pm.omegas.length; o++) {
+                    var omega = pm.omegas[o];
+                    if (!omega || !omega.online || !omega.devices) continue;
+                    for (var d = 0; d < omega.devices.length; d++) {
+                        var dev = omega.devices[d];
+                        if (dev && !dev.error && dev.angle !== null && dev.angle !== undefined) {
+                            sum += dev.angle;
+                            count++;
+                        }
+                    }
+                }
+            }
+            return count > 0 ? sum / count : 0;
+        },
+
+        // getAngleCellColor: Aci degerinin ortalamaya uzakligina gore renk dondurur.
+        // Yakin = yesil, uzak = kirmizi. maxDiff uzerinde full kirmizi.
+        getAngleCellColor(pm, omegaIdx, devIdx) {
+            if (!pm || !pm.online || !pm.omegas || omegaIdx >= pm.omegas.length) return '';
+            var omega = pm.omegas[omegaIdx];
+            if (!omega || !omega.online || !omega.devices || devIdx >= omega.devices.length) return '';
+            var dev = omega.devices[devIdx];
+            if (!dev || dev.error || dev.angle === null || dev.angle === undefined) return '';
+            var avg = this.getAngleAvg();
+            var diff = Math.abs(dev.angle - avg);
+            var maxDiff = 15;
+            var ratio = Math.min(diff / maxDiff, 1);
+            // Yesil (0,180,0) -> Kirmizi (220,40,40)
+            var r = Math.round(0 + ratio * 220);
+            var g = Math.round(180 - ratio * 140);
+            var b = Math.round(0 + ratio * 40);
+            return 'rgb(' + r + ',' + g + ',' + b + ')';
+        },
+
         // getPixelColor: Belirli bir PM > Omega > Cihaz icin mod rengini dondurur.
         // PM offline, Omega offline veya veri yoksa uygun durum rengini verir.
         getPixelColor(pm, omegaIdx, devIdx) {
