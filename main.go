@@ -118,6 +118,9 @@ type OmegaData struct {
 	DeviceCount int          `json:"device_count"`
 	Devices     []DeviceData `json:"devices"`
 	Online      bool         `json:"online"`
+	Cached      bool         `json:"cached,omitempty"`
+	CacheTs     string       `json:"cache_ts,omitempty"`
+	CacheAge    int          `json:"cache_age,omitempty"`
 }
 
 // PMSnapshot: Bir PlantManager'in tum Omega'lariyla birlikte anlик goruntusunu tutar.
@@ -215,8 +218,11 @@ func pollOnePM(pm PMCfg) PMSnapshot {
 
 		// Omega'nin cache'lenmi veri endpoint'ini sorgula
 		var cacheResp struct {
-			Success bool                       `json:"success"`
-			Data    map[string]json.RawMessage `json:"data"`
+			Success  bool                       `json:"success"`
+			Data     map[string]json.RawMessage `json:"data"`
+			Cached   bool                       `json:"_cached"`
+			CacheTs  string                     `json:"_cache_ts"`
+			CacheAge int                        `json:"_cache_age"`
 		}
 		cacheURL := fmt.Sprintf("%s/api/omega/%d/cache/data", baseURL, o.ID)
 		if err := fetchJSON(cacheURL, &cacheResp); err != nil || !cacheResp.Success {
@@ -231,6 +237,9 @@ func pollOnePM(pm PMCfg) PMSnapshot {
 		}
 
 		od.Online = true
+		od.Cached = cacheResp.Cached
+		od.CacheTs = cacheResp.CacheTs
+		od.CacheAge = cacheResp.CacheAge
 		od.Devices = make([]DeviceData, dc)
 
 		// Her cihazin Modbus register verilerini isle
