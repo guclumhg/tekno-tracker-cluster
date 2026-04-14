@@ -368,9 +368,10 @@ function trackerCluster() {
             var promises = selected.map(function(pm) {
                 if (!pm.omegas) return Promise.resolve(null);
                 var ids = pm.omegas.map(function(o) { return o.id; });
-                // 0-15 arasi tum cihazlara yazma yapilir
+                // PM'den gelen device_count kadar cihaza yazma yapilir
+                var maxDev = Math.max.apply(null, pm.omegas.map(function(o) { return o.device_count || 16; }));
                 var devices = [];
-                for (var d = 0; d < 16; d++) devices.push(d);
+                for (var d = 0; d < maxDev; d++) devices.push(d);
                 return fetch('http://' + pm.ip + ':8090/api/bulk/mode', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -447,8 +448,9 @@ function trackerCluster() {
             var promises = selected.map(function(pm) {
                 if (!pm.omegas) return Promise.resolve(null);
                 var ids = pm.omegas.map(function(o) { return o.id; });
+                var maxDev = Math.max.apply(null, pm.omegas.map(function(o) { return o.device_count || 16; }));
                 var devices = [];
-                for (var d = 0; d < 16; d++) devices.push(d);
+                for (var d = 0; d < maxDev; d++) devices.push(d);
                 return fetch('http://' + pm.ip + ':8090/api/bulk/angle', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
