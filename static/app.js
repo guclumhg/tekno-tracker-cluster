@@ -194,6 +194,23 @@ function trackerCluster() {
         // Pixel Renk ve Veri Erisim Fonksiyonlari
         // -----------------------------------------------------------------------
 
+        // getTooltip: Pixel/hucre icin tooltip metni olusturur.
+        getTooltip(pm, omegaIdx, col) {
+            var base = pm.name + ' DTK' + (omegaIdx + 1) + ' Cihaz' + col;
+            if (!pm || !pm.omegas || omegaIdx >= pm.omegas.length) return base;
+            var omega = pm.omegas[omegaIdx];
+            if (!omega) return base;
+            if (omega.cached && omega.cache_ts) {
+                var age = omega.cache_age || 0;
+                var ageStr = age < 60 ? age + 'sn' : Math.floor(age / 60) + 'dk';
+                return base + ' | Son yanit: ' + omega.cache_ts + ' (' + ageStr + ' once)';
+            }
+            if (omega.cache_ts) {
+                return base + ' | ' + omega.cache_ts;
+            }
+            return base;
+        },
+
         // getPixelColor: Belirli bir PM > Omega > Cihaz icin mod rengini dondurur.
         // PM offline, Omega offline veya veri yoksa uygun durum rengini verir.
         getPixelColor(pm, omegaIdx, devIdx) {

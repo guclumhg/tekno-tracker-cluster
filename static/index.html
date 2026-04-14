@@ -97,7 +97,7 @@
                                     <template x-for="col in pmMaxDevices(pm)" :key="'pc'+ri+'_'+wi+'_'+row+'_'+col">
                                         <div class="pixel"
                                              :style="'background:' + getPixelColor(pm, reverseRow(row,pm)-1, col-1)"
-                                             :title="pm.name + ' DTK' + reverseRow(row,pm) + ' Cihaz' + col">
+                                             :title="getTooltip(pm, reverseRow(row,pm)-1, col)">
                                         </div>
                                     </template>
                                 </template>
@@ -158,7 +158,7 @@
                                     <template x-for="col in pmMaxDevices(pm)" :key="'aec'+ri+'_'+wi+'_'+row+'_'+col">
                                         <div class="angle-cell"
                                              :class="getAngleText(pm, reverseRow(row,pm)-1, col-1) ? '' : 'angle-empty'"
-                                             :title="pm.name + ' DTK' + reverseRow(row,pm) + ' Cihaz' + col"
+                                             :title="getTooltip(pm, reverseRow(row,pm)-1, col)"
                                              x-text="getAngleText(pm, reverseRow(row,pm)-1, col-1) || ''">
                                         </div>
                                     </template>
@@ -225,7 +225,7 @@
                                     <template x-for="col in pmMaxDevices(pm)" :key="'tec'+ri+'_'+wi+'_'+row+'_'+col">
                                         <div class="time-cell"
                                              :class="getTimeText(pm, reverseRow(row,pm)-1, col-1) ? '' : 'time-empty'"
-                                             :title="pm.name + ' DTK' + reverseRow(row,pm) + ' Cihaz' + col"
+                                             :title="getTooltip(pm, reverseRow(row,pm)-1, col)"
                                              x-text="getTimeText(pm, reverseRow(row,pm)-1, col-1) || ''">
                                         </div>
                                     </template>
