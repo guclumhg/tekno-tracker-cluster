@@ -98,8 +98,9 @@ function trackerCluster() {
             { value: 0x08, label: 'MNT', color: '#FFD600' },
         ],
 
-        // Fark boyama modu
-        colorMode: false,
+        // Fark boyama: snapshot renkleri (hesaplaninca dolar, yoksa bos)
+        angleColors: {},
+        timeColors: {},
 
         // Ayarlar sekmesi durumu
         settings: {
@@ -247,23 +248,71 @@ function trackerCluster() {
 
         // getAngleCellColor: Aci degerinin ortalamaya uzakligina gore renk dondurur.
         // Yakin = yesil, uzak = kirmizi. maxDiff uzerinde full kirmizi.
-        getAngleCellColor(pm, omegaIdx, devIdx) {
-            if (!this.colorMode) return '';
-            if (!pm || !pm.online || !pm.omegas || omegaIdx >= pm.omegas.length) return '';
-            var omega = pm.omegas[omegaIdx];
-            if (!omega || !omega.online || !omega.devices || devIdx >= omega.devices.length) return '';
-            var dev = omega.devices[devIdx];
-            if (!dev || dev.error || dev.angle === null || dev.angle === undefined) return '';
+        // paintAngles: Tum aci hucreleri icin renkleri bir kere hesapla ve kaydet.
+        paintAngles() {
+            var colors = {};
             var avg = this.getAngleAvg();
-            var diff = Math.abs(dev.angle - avg);
-            var maxDiff = 40;
-            var ratio = Math.min(diff / maxDiff, 1);
-            // Yesil (0,180,0) -> Kirmizi (220,40,40)
-            var r = Math.round(0 + ratio * 220);
-            var g = Math.round(180 - ratio * 140);
-            var b = Math.round(0 + ratio * 40);
-            return 'rgb(' + r + ',' + g + ',' + b + ')';
+            for (var p = 0; p < this.cluster.length; p++) {
+                var pm = this.cluster[p];
+                if (!pm || !pm.online || !pm.omegas) continue;
+                for (var o = 0; o < pm.omegas.length; o++) {
+                    var omega = pm.omegas[o];
+                    if (!omega || !omega.online || !omega.devices) continue;
+                    for (var d = 0; d < omega.devices.length; d++) {
+                        var dev = omega.devices[d];
+                        if (!dev || dev.error || dev.angle === null || dev.angle === undefined) continue;
+                        var diff = Math.abs(dev.angle - avg);
+                        var ratio = Math.min(diff / 40, 1);
+                        var r = Math.round(ratio * 220);
+                        var g = Math.round(180 - ratio * 140);
+                        var b = Math.round(ratio * 40);
+                        colors[pm.name + '_' + o + '_' + d] = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    }
+                }
+            }
+            this.angleColors = colors;
         },
+
+        // paintTimes: Tum zaman hucreleri icin renkleri bir kere hesapla ve kaydet.
+        paintTimes() {
+            var colors = {};
+            var avg = this.getTimeAvg();
+            for (var p = 0; p < this.cluster.length; p++) {
+                var pm = this.cluster[p];
+                if (!pm || !pm.online || !pm.omegas) continue;
+                for (var o = 0; o < pm.omegas.length; o++) {
+                    var omega = pm.omegas[o];
+                    if (!omega || !omega.online || !omega.devices) continue;
+                    for (var d = 0; d < omega.devices.length; d++) {
+                        var dev = omega.devices[d];
+                        if (!dev || dev.error || !dev.time) continue;
+                        var parts = dev.time.split(':');
+                        if (parts.length < 2) continue;
+                        var mins = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+                        var diff = Math.abs(mins - avg);
+                        var ratio = Math.min(diff / 60, 1);
+                        var r = Math.round(ratio * 220);
+                        var g = Math.round(180 - ratio * 140);
+                        var b = Math.round(ratio * 40);
+                        colors[pm.name + '_' + o + '_' + d] = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    }
+                }
+            }
+            this.timeColors = colors;
+        },
+
+        // clearPaint: Boyamayi temizle.
+        clearPaint() {
+            this.angleColors = {};
+            this.timeColors = {};
+        },
+
+        getAngleCellColor(pm, omegaIdx, devIdx) {
+            if (!pm) return '';
+            var key = pm.name + '_' + omegaIdx + '_' + devIdx;
+            return this.angleColors[key] || '';
+        },
+
 
         // getTimeAvg: Tum cluster'daki gecerli saat degerlerinin ortalamasini dakika cinsinden hesaplar.
         getTimeAvg() {
@@ -300,23 +349,9 @@ function trackerCluster() {
         // getTimeCellColor: Saat degerinin ortalamaya uzakligina gore renk dondurur.
         // Yakin = yesil, 60dk+ uzak = kirmizi.
         getTimeCellColor(pm, omegaIdx, devIdx) {
-            if (!this.colorMode) return '';
-            if (!pm || !pm.online || !pm.omegas || omegaIdx >= pm.omegas.length) return '';
-            var omega = pm.omegas[omegaIdx];
-            if (!omega || !omega.online || !omega.devices || devIdx >= omega.devices.length) return '';
-            var dev = omega.devices[devIdx];
-            if (!dev || dev.error || !dev.time) return '';
-            var parts = dev.time.split(':');
-            if (parts.length < 2) return '';
-            var mins = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-            var avg = this.getTimeAvg();
-            var diff = Math.abs(mins - avg);
-            var maxDiff = 60; // 1 saat
-            var ratio = Math.min(diff / maxDiff, 1);
-            var r = Math.round(0 + ratio * 220);
-            var g = Math.round(180 - ratio * 140);
-            var b = Math.round(0 + ratio * 40);
-            return 'rgb(' + r + ',' + g + ',' + b + ')';
+            if (!pm) return '';
+            var key = pm.name + '_' + omegaIdx + '_' + devIdx;
+            return this.timeColors[key] || '';
         },
 
         // getPixelColor: Belirli bir PM > Omega > Cihaz icin mod rengini dondurur.
