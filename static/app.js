@@ -30,8 +30,8 @@ var MODE_NAMES = {
 
 // Ozel durum renkleri
 var ERR_COLOR = '#D32F2F';     // Hata olan cihazlar icin kirmizi
-var OFFLINE_COLOR = '#ccc';     // Cevrimdisi PM/Omega icin acik gri
-var NODATA_COLOR = '#eee';      // Veri gelmemis cihazlar icin acik arka plan
+var OFFLINE_COLOR = '#888';     // Cevrimdisi PM/Omega icin orta gri
+var NODATA_COLOR = '#fff';      // Tanimsiz cihazlar icin beyaz (gorünmez)
 
 // modePixelColor: Bir cihazin mod degerine gore pixel rengini dondurur.
 // Hata varsa kirmizi, mod bilinmiyorsa gri tonlari kullanilir.
@@ -176,15 +176,9 @@ function trackerCluster() {
             return (pm && pm.omegas) ? pm.omegas.length : 16;
         },
 
-        // pmMaxDevices: PM'deki en buyuk device_count degerini dondurur.
+        // pmMaxDevices: Grid sutun sayisi — DTK basina sabit 16 cihaz.
         pmMaxDevices(pm) {
-            if (!pm || !pm.omegas || pm.omegas.length === 0) return 16;
-            var max = 0;
-            for (var i = 0; i < pm.omegas.length; i++) {
-                var dc = pm.omegas[i].device_count || 16;
-                if (dc > max) max = dc;
-            }
-            return max || 16;
+            return 16;
         },
 
         // reverseRow: Omega satir numarasini ters cevirir.
@@ -437,7 +431,7 @@ function trackerCluster() {
                 { label: 'MNT', count: mc[8], color: '#FFD600' },
                 { label: 'ZRO', count: mc[9], color: '#795548' },
                 { label: 'ERR', count: error, color: '#D32F2F' },
-                { label: 'OFF', count: offline, color: '#ccc' },
+                { label: 'OFF', count: offline, color: '#888' },
             ];
             return { total: total, online: online, error: error, offline: offline, pmsOnline: pmsOnline, pmsTotal: this.cluster.length, modeCounts: modeCounts };
         },
