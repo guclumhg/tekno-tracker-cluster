@@ -49,7 +49,7 @@
             <!-- Bulk control -->
             <div class="form-box" style="margin-bottom:8px">
                 <div class="form-row" style="margin-bottom:4px">
-                    <span style="font-size:10px;color:#888;min-width:50px">Santral:</span>
+                    <span style="font-size:10px;color:#666;min-width:50px">Santral:</span>
                     <button class="btn btn-sm" :class="bulkAllSelected() ? 'btn-blue' : 'btn-mode-off'"
                             @click="bulkSelectAll()" style="font-size:9px;padding:2px 6px">TUMU</button>
                     <template x-for="(pm, wi) in cluster" :key="'bs'+wi">
@@ -61,10 +61,10 @@
                     </template>
                 </div>
                 <div class="form-row">
-                    <span style="font-size:10px;color:#888;min-width:50px">Mod:</span>
+                    <span style="font-size:10px;color:#666;min-width:50px">Mod:</span>
                     <template x-for="m in bulkModes" :key="'bm'+m.value">
                         <button class="btn btn-sm"
-                                :style="'background:' + (bulk.selectedMode === m.value ? m.color : '#444') + ';color:' + (bulk.selectedMode === m.value ? (m.value === 8 ? '#000' : '#fff') : '#888')"
+                                :style="'background:' + (bulk.selectedMode === m.value ? m.color : '#ddd') + ';color:' + (bulk.selectedMode === m.value ? (m.value === 8 ? '#000' : '#fff') : '#666')"
                                 @click="bulkSelectMode(m.value)"
                                 style="font-size:9px;padding:2px 6px"
                                 x-text="m.label"></button>
@@ -91,7 +91,7 @@
                 <div class="block-row">
                     <template x-for="(pm, wi) in pmRow" :key="'bw'+ri+'_'+wi">
                         <div class="block">
-                            <a class="block-label" :href="'http://' + pm.ip + ':8090/'" target="_blank" x-text="pm.name" :style="'color:' + (pm.online ? '#4FC3F7' : '#555') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
+                            <a class="block-label" :href="'http://' + pm.ip + ':8090/'" target="_blank" x-text="pm.name" :style="'color:' + (pm.online ? '#1565C0' : '#aaa') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
                             <div class="pixel-grid" :style="'grid-template-columns:repeat(' + pmMaxDevices(pm) + ',1fr)'">
                                 <template x-for="row in pmOmegaCount(pm)" :key="'pr'+ri+'_'+wi+'_'+row">
                                     <template x-for="col in pmMaxDevices(pm)" :key="'pc'+ri+'_'+wi+'_'+row+'_'+col">
@@ -124,7 +124,7 @@
             <!-- Bulk angle control -->
             <div class="form-box" style="margin-bottom:8px">
                 <div class="form-row" style="margin-bottom:4px">
-                    <span style="font-size:10px;color:#888;min-width:50px">Santral:</span>
+                    <span style="font-size:10px;color:#666;min-width:50px">Santral:</span>
                     <button class="btn btn-sm" :class="bulkAngleAllSelected() ? 'btn-blue' : 'btn-mode-off'"
                             @click="bulkAngleSelectAll()" style="font-size:9px;padding:2px 6px">TUMU</button>
                     <template x-for="(pm, wi) in cluster" :key="'as'+wi">
@@ -136,14 +136,14 @@
                     </template>
                 </div>
                 <div class="form-row">
-                    <span style="font-size:10px;color:#888;min-width:50px">Aci:</span>
+                    <span style="font-size:10px;color:#666;min-width:50px">Aci:</span>
                     <input type="number" x-model="bulkAngle.angle" min="-60" max="60" step="1" placeholder="derece" style="width:70px;font-size:11px">
                     <span style="font-size:9px;color:#666">(-60 ~ +60)</span>
                     <button class="btn btn-green btn-sm"
                             :disabled="!bulkAngle.angle || bulkAngle.busy"
                             @click="bulkApplyAngle()"
                             style="font-size:10px;padding:3px 10px">GUNCELLE</button>
-                    <span style="font-size:10px;color:#4FC3F7;margin-left:10px">Ort: <strong x-text="getAngleAvg().toFixed(1) + '°'"></strong></span>
+                    <span style="font-size:10px;color:#1565C0;margin-left:10px">Ort: <strong x-text="getAngleAvg().toFixed(1) + '°'"></strong></span>
                 <span class="refresh-info" x-show="bulkAngle.msg" x-text="bulkAngle.msg"
                           :style="'color:' + (bulkAngle.busy ? '#FF9800' : '#4CAF50') + ';font-weight:bold'"></span>
                 </div>
@@ -153,7 +153,7 @@
                 <div class="block-row">
                     <template x-for="(pm, wi) in pmRow" :key="'ab'+ri+'_'+wi">
                         <div class="block">
-                            <a class="block-label" :href="'http://' + pm.ip + ':8090/'" target="_blank" x-text="pm.name" :style="'color:' + (pm.online ? '#4FC3F7' : '#555') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
+                            <a class="block-label" :href="'http://' + pm.ip + ':8090/'" target="_blank" x-text="pm.name" :style="'color:' + (pm.online ? '#1565C0' : '#aaa') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
                             <div class="angle-grid" :style="'grid-template-columns:repeat(' + pmMaxDevices(pm) + ',1fr)'">
                                 <template x-for="row in pmOmegaCount(pm)" :key="'aer'+ri+'_'+wi+'_'+row">
                                     <template x-for="col in pmMaxDevices(pm)" :key="'aec'+ri+'_'+wi+'_'+row+'_'+col">
@@ -188,7 +188,7 @@
             <!-- Bulk time control -->
             <div class="form-box" style="margin-bottom:8px">
                 <div class="form-row" style="margin-bottom:4px">
-                    <span style="font-size:10px;color:#888;min-width:50px">Santral:</span>
+                    <span style="font-size:10px;color:#666;min-width:50px">Santral:</span>
                     <button class="btn btn-sm" :class="bulkTimeAllSelected() ? 'btn-blue' : 'btn-mode-off'"
                             @click="bulkTimeSelectAll()" style="font-size:9px;padding:2px 6px">TUMU</button>
                     <template x-for="(pm, wi) in cluster" :key="'ts'+wi">
@@ -205,7 +205,7 @@
                             @click="bulkApplyTimeBrowser()"
                             style="font-size:10px;padding:3px 10px">BROWSER SAATI YAZ</button>
                     <span style="font-size:10px;color:#666" x-text="'Browser: ' + bulkTimeBrowserNow()"></span>
-                    <span style="color:#555">|</span>
+                    <span style="color:#aaa">|</span>
                     <input type="date" x-model="bulkTime.manualDate" style="width:110px;font-size:10px">
                     <input type="time" x-model="bulkTime.manualTime" step="1" style="width:75px;font-size:10px">
                     <button class="btn btn-green btn-sm"
@@ -221,7 +221,7 @@
                 <div class="block-row">
                     <template x-for="(pm, wi) in pmRow" :key="'tb'+ri+'_'+wi">
                         <div class="block">
-                            <a class="block-label" :href="'http://' + pm.ip + ':8090/'" target="_blank" x-text="pm.name" :style="'color:' + (pm.online ? '#4FC3F7' : '#555') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
+                            <a class="block-label" :href="'http://' + pm.ip + ':8090/'" target="_blank" x-text="pm.name" :style="'color:' + (pm.online ? '#1565C0' : '#aaa') + ';text-decoration:none'" @mouseenter="$el.style.textDecoration='underline'" @mouseleave="$el.style.textDecoration='none'"></a>
                             <div class="time-grid" :style="'grid-template-columns:repeat(' + pmMaxDevices(pm) + ',1fr)'">
                                 <template x-for="row in pmOmegaCount(pm)" :key="'ter'+ri+'_'+wi+'_'+row">
                                     <template x-for="col in pmMaxDevices(pm)" :key="'tec'+ri+'_'+wi+'_'+row+'_'+col">
@@ -258,7 +258,7 @@
     </main>
 </div>
 
-<footer style="text-align:center;padding:12px;font-size:10px;color:#666;border-top:1px solid #333;margin-top:20px">
+<footer style="text-align:center;padding:12px;font-size:10px;color:#999;border-top:1px solid #ddd;margin-top:20px">
     Designed and Written by Muhammed Hasan GUCLU - 2026
 </footer>
 </body>

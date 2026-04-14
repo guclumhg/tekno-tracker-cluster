@@ -30,8 +30,8 @@ var MODE_NAMES = {
 
 // Ozel durum renkleri
 var ERR_COLOR = '#D32F2F';     // Hata olan cihazlar icin kirmizi
-var OFFLINE_COLOR = '#333';     // Cevrimdisi PM/Omega icin koyu gri
-var NODATA_COLOR = '#1a1a1a';   // Veri gelmemis cihazlar icin arka plan rengi
+var OFFLINE_COLOR = '#ccc';     // Cevrimdisi PM/Omega icin acik gri
+var NODATA_COLOR = '#eee';      // Veri gelmemis cihazlar icin acik arka plan
 
 // modePixelColor: Bir cihazin mod degerine gore pixel rengini dondurur.
 // Hata varsa kirmizi, mod bilinmiyorsa gri tonlari kullanilir.
