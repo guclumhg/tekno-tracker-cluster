@@ -167,10 +167,27 @@ function trackerCluster() {
             return [this.cluster];
         },
 
+        // pmOmegaCount: PM'deki omega sayisini dondurur.
+        pmOmegaCount(pm) {
+            return (pm && pm.omegas) ? pm.omegas.length : 16;
+        },
+
+        // pmMaxDevices: PM'deki en buyuk device_count degerini dondurur.
+        pmMaxDevices(pm) {
+            if (!pm || !pm.omegas || pm.omegas.length === 0) return 16;
+            var max = 0;
+            for (var i = 0; i < pm.omegas.length; i++) {
+                var dc = pm.omegas[i].device_count || 16;
+                if (dc > max) max = dc;
+            }
+            return max || 16;
+        },
+
         // reverseRow: Omega satir numarasini ters cevirir.
         // Fiziksel yerlesimde Omega siralama yukari-asagi oldugu icin gerekli.
-        reverseRow(row) {
-            return 17 - row;
+        reverseRow(row, pm) {
+            var count = this.pmOmegaCount(pm);
+            return (count + 1) - row;
         },
 
         // -----------------------------------------------------------------------
