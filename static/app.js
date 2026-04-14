@@ -200,13 +200,10 @@ function trackerCluster() {
             if (!pm || !pm.omegas || omegaIdx >= pm.omegas.length) return base;
             var omega = pm.omegas[omegaIdx];
             if (!omega) return base;
-            if (omega.cached && omega.cache_ts) {
-                var age = omega.cache_age || 0;
+            if (omega.cached && omega.cache_age !== undefined) {
+                var age = omega.cache_age;
                 var ageStr = age < 60 ? age + 'sn' : Math.floor(age / 60) + 'dk';
-                return base + ' | Son yanit: ' + omega.cache_ts + ' (' + ageStr + ' once)';
-            }
-            if (omega.cache_ts) {
-                return base + ' | ' + omega.cache_ts;
+                return base + ' | Cache (' + ageStr + ' once)';
             }
             return base;
         },
