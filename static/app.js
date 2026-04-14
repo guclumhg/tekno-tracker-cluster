@@ -200,10 +200,22 @@ function trackerCluster() {
             if (!pm || !pm.omegas || omegaIdx >= pm.omegas.length) return base;
             var omega = pm.omegas[omegaIdx];
             if (!omega) return base;
+            // Mod ve aci bilgisi ekle
+            if (omega.online && omega.devices && (col - 1) < omega.devices.length) {
+                var dev = omega.devices[col - 1];
+                if (dev && !dev.error) {
+                    var modeName = (dev.mode !== null && dev.mode !== undefined) ? (MODE_NAMES[dev.mode] || ('Mod ' + dev.mode)) : '?';
+                    var angleStr = (dev.angle !== null && dev.angle !== undefined) ? dev.angle + '°' : '?';
+                    base += ' | ' + modeName + ' | ' + angleStr;
+                } else {
+                    base += ' | Hata';
+                }
+            }
+            // Cache fallback bilgisi
             if (omega.cached && omega.cache_age !== undefined) {
                 var age = omega.cache_age;
                 var ageStr = age < 60 ? age + 'sn' : Math.floor(age / 60) + 'dk';
-                return base + ' | Cache (' + ageStr + ' once)';
+                base += ' | Cache (' + ageStr + ' once)';
             }
             return base;
         },
