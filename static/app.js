@@ -6,7 +6,7 @@
  * Designed and Written by Muhammed Hasan GUCLU - 2026
  */
 
-var APP_VERSION = "4.3";
+var APP_VERSION = "4.5";
 
 // ---------------------------------------------------------------------------
 // Sabitler — Mod renkleri, mod isimleri ve ozel durum renkleri
